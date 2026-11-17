@@ -1,10 +1,5 @@
-
 import bcrypt from "bcryptjs";
-import {
-  Generettoke,
-  LoginApi,
-  RagisterAPI
-} from "../Model_API/Login.js";
+import { Generettoke, LoginApi, RagisterAPI } from "../Model_API/Login.js";
 
 export async function ragisteruser(req, resp) {
   try {
@@ -18,7 +13,7 @@ export async function ragisteruser(req, resp) {
       username,
       email,
       password: newpass,
-      role
+      role,
     };
 
     // 3. Save user in database
@@ -33,14 +28,13 @@ export async function ragisteruser(req, resp) {
         id: result._id,
         username: result.username,
         email: result.email,
-        role: result.role
+        role: result.role,
       },
-      token
+      token,
     });
-
   } catch (error) {
     return resp.status(500).json({
-      message: error.message
+      message: error.message,
     });
   }
 }
@@ -49,13 +43,16 @@ export async function loginuser(req, resp) {
   try {
     const { email, password } = req.body;
 
-    const result = LoginApi({ email });
+    const result = await LoginApi(email);
 
     if (!result) {
-      resp.status(401).json({ message: "invalid username and password" });
+      return resp.status(401).json({
+        message: "Invalid username and password",
+      });
     }
 
-    const matched = bcrypt.compare(password, result.password);
+    const matched = await bcrypt.compare(password, result.password);
+
     if (!matched) {
       return resp.status(401).json({
         message: "Invalid username or password",
@@ -67,9 +64,15 @@ export async function loginuser(req, resp) {
     return resp.status(200).json({
       message: "Login successful",
       token,
+      data: {
+        id: result._id,
+        username: result.username,
+        email: result.email,
+        role: result.role,
+      },
     });
   } catch (error) {
-    resp.status(500).json({
+    return resp.status(500).json({
       message: error.message,
     });
   }

@@ -17,15 +17,18 @@ export default function Welcome() {
   };
 
   const navigate = useNavigate();
-  const handllogout = ()=>{
+  const handllogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("email");
+    alert("you have successfully logout");
+    navigate("/");
+  };
 
-    localStorage.removeItem("token")
-    localStorage.removeItem("username")
-    localStorage.removeItem("email")
-    alert("you have successfully logout")
-    navigate("/")
-
-  }
+  const handleMenuClick = (path) => {
+    setanchoel(null);
+    navigate(path);
+  };
   return (
     <>
       <AppBar position="fixed" color="primary">
@@ -40,11 +43,24 @@ export default function Welcome() {
               <MenuIcon />
             </IconButton>
 
-            <Menu anchorEl={anchoel} open={Boolean(anchoel)}>
-              <MenuItem onClick={() => setanchoel(null)}>Home</MenuItem>
-              <MenuItem onClick={() => setanchoel(null)}>About</MenuItem>
-              <MenuItem onClick={() => setanchoel(null)}>Contact</MenuItem>
-              <MenuItem onClick={() => setanchoel(null)}>Logout</MenuItem>
+            <Menu
+              anchorEl={anchoel}
+              open={Boolean(anchoel)}
+              onClose={() => setanchoel(null)}
+            >
+              <MenuItem onClick={() => handleMenuClick("/home")}>Home</MenuItem>
+
+              <MenuItem onClick={() => handleMenuClick("/about")}>
+                About
+              </MenuItem>
+
+              <MenuItem onClick={() => handleMenuClick("/contect")}>
+                Contact
+              </MenuItem>
+
+              <MenuItem onClick={() => handleMenuClick("/logout")}>
+                Logout
+              </MenuItem>
             </Menu>
           </Box>
           {/* Desktop Menu */}
@@ -55,8 +71,12 @@ export default function Welcome() {
             <Button color="inherit" component={Link} to="/about">
               About
             </Button>
-            <Button color="inherit"  component={Link} to="/contect">Contact</Button>
-            <Button color="inherit" onClick={handllogout}>Logout</Button>
+            <Button color="inherit" component={Link} to="/contect">
+              Contact
+            </Button>
+            <Button color="inherit" onClick={handllogout}>
+              Logout
+            </Button>
           </Box>
         </Toolbar>
       </AppBar>

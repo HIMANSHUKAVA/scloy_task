@@ -3,7 +3,7 @@ import { Generettoke, LoginApi, RagisterAPI } from "../Model_API/Login.js";
 
 export async function ragisteruser(req, resp) {
   try {
-    const { username, email, password, role } = req.body;
+    const { username, email, password} = req.body;
 
     // 1. Hash password
     const newpass = await bcrypt.hash(password, 10);
@@ -13,7 +13,7 @@ export async function ragisteruser(req, resp) {
       username,
       email,
       password: newpass,
-      role,
+      role : "User"
     };
 
     // 3. Save user in database

@@ -1,25 +1,37 @@
 import bcrypt from "bcryptjs";
 import { Generettoke, LoginApi, RagisterAPI } from "../Model_API/Login.js";
+import loginmodel from "../Model/LoginModel.js";
 
 export async function ragisteruser(req, resp) {
   try {
-    const { username, email, password} = req.body;
+    const { username, email, password } = req.body;
 
-    // 1. Hash password
+    // 1. Check existing user
+    const existingUser = await loginmodel.findOne({
+      email: email.trim().toLowerCase(),
+    });
+
+    if (existingUser) {
+      return resp.status(409).json({
+        message: "Email already registered",
+      });
+    }
+
+    // 2. Hash password
     const newpass = await bcrypt.hash(password, 10);
 
-    // 2. Create user object
+    // 3. Create user object
     const user = {
       username,
-      email,
+      email: email.trim().toLowerCase(),
       password: newpass,
-      role : "User"
+      role: "User",
     };
 
-    // 3. Save user in database
+    // 4. Save user
     const result = await RagisterAPI(user);
 
-    // 4. Generate token
+    // 5. Generate token
     const token = Generettoke(result);
 
     return resp.status(201).json({
@@ -33,6 +45,13 @@ export async function ragisteruser(req, resp) {
       token,
     });
   } catch (error) {
+    // Duplicate email index error
+    if (error.code === 11000) {
+      return resp.status(409).json({
+        message: "Email already registered",
+      });
+    }
+
     return resp.status(500).json({
       message: error.message,
     });

@@ -1,54 +1,159 @@
+
 import React, { useState } from "react";
 
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Container from "@mui/material/Container";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
+import Alert from "@mui/material/Alert";
+
 import PersonIcon from "@mui/icons-material/Person";
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Ragister() {
+
   const [deta, setdeta] = useState({
     username: "",
     email: "",
     password: "",
-    role: "",
   });
 
+  const [errors, setErrors] = useState({});
   const [showpassword, setshowpassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
-  const handlchaneevent = (e) => {
-    setdeta({
-      ...deta,
-      [e.target.name]: e.target.value,
-    });
+  // Individual field validation
+  const validateField = (name, value) => {
+
+    switch (name) {
+
+      case "username":
+        if (!value.trim()) {
+          return "Username is required";
+        }
+
+        if (value.trim().length < 3) {
+          return "Username must be at least 3 characters";
+        }
+
+        if (!/^[a-zA-Z ]+$/.test(value.trim())) {
+          return "Username can contain only letters and spaces";
+        }
+
+        return "";
+
+      case "email":
+        if (!value.trim()) {
+          return "Email is required";
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
+          return "Please enter a valid email address";
+        }
+
+        return "";
+
+      case "password":
+        if (!value) {
+          return "Password is required";
+        }
+
+        if (value.length < 8) {
+          return "Password must contain at least 8 characters";
+        }
+
+        if (!/[A-Z]/.test(value)) {
+          return "At least one uppercase letter is required";
+        }
+
+        if (!/[a-z]/.test(value)) {
+          return "At least one lowercase letter is required";
+        }
+
+        if (!/[0-9]/.test(value)) {
+          return "At least one number is required";
+        }
+
+        if (!/[^A-Za-z0-9]/.test(value)) {
+          return "At least one special character is required";
+        }
+
+        return "";
+
+      default:
+        return "";
+    }
   };
 
+  // Handle input changes
+  const handlchaneevent = (e) => {
+
+    const { name, value } = e.target;
+
+    setdeta((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: validateField(name, value),
+    }));
+
+    setError("");
+  };
+
+  // Validate all fields
+  const validateForm = () => {
+
+    const newErrors = {};
+
+    Object.keys(deta).forEach((key) => {
+      newErrors[key] = validateField(key, deta[key]);
+    });
+
+    setErrors(newErrors);
+
+    return Object.values(newErrors).every((item) => item === "");
+  };
+
+  // Submit form
   const handleSubmit = async (e) => {
+
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
+    setError("");
 
     try {
-      const res = await axios.post("http://localhost:5600/auth/ragister", deta);
 
-      alert("Registration successful");
+      const payload = {
+        username: deta.username.trim(),
+        email: deta.email.trim().toLowerCase(),
+        password: deta.password,
+      };
+
+      const res = await axios.post(
+        "http://localhost:5600/auth/ragister",
+        payload
+      );
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("role", res.data.data.role);
@@ -59,19 +164,27 @@ export default function Ragister() {
         username: "",
         email: "",
         password: "",
-        role: "",
       });
 
+      setErrors({});
+
       navigate("/home");
+
     } catch (er) {
-      console.log(er);
-      alert(er.response?.data?.message || "Registration failed");
+
+      setError(
+        er.response?.data?.message || "Registration failed"
+      );
+
     } finally {
+
       setLoading(false);
+
     }
   };
 
   return (
+
     <Box
       sx={{
         minHeight: "100vh",
@@ -82,7 +195,9 @@ export default function Ragister() {
         py: 4,
       }}
     >
+
       <Container maxWidth="sm">
+
         <Paper
           elevation={0}
           sx={{
@@ -92,8 +207,11 @@ export default function Ragister() {
             boxShadow: "0 12px 40px rgba(0,0,0,0.06)",
           }}
         >
+
           {/* Heading */}
+
           <Box sx={{ textAlign: "center", mb: 4 }}>
+
             <Box
               sx={{
                 width: 55,
@@ -118,10 +236,21 @@ export default function Ragister() {
             <Typography color="text.secondary" sx={{ mt: 1 }}>
               Register to get started
             </Typography>
+
           </Box>
 
           {/* Registration Form */}
-          <Box component="form" onSubmit={handleSubmit}>
+
+          <Box component="form" onSubmit={handleSubmit} noValidate>
+
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+
+            {/* Username */}
+
             <Typography fontWeight={600} sx={{ mb: 1 }}>
               Username
             </Typography>
@@ -132,8 +261,9 @@ export default function Ragister() {
               placeholder="Enter your name"
               value={deta.username}
               onChange={handlchaneevent}
+              error={Boolean(errors.username)}
+              helperText={errors.username}
               required
-              sx={{ mb: 2.5 }}
               slotProps={{
                 input: {
                   startAdornment: (
@@ -143,7 +273,10 @@ export default function Ragister() {
                   ),
                 },
               }}
+              sx={{ mb: 2.5 }}
             />
+
+            {/* Email */}
 
             <Typography fontWeight={600} sx={{ mb: 1 }}>
               Email Address
@@ -156,8 +289,9 @@ export default function Ragister() {
               placeholder="Enter your email"
               value={deta.email}
               onChange={handlchaneevent}
+              error={Boolean(errors.email)}
+              helperText={errors.email}
               required
-              sx={{ mb: 2.5 }}
               slotProps={{
                 input: {
                   startAdornment: (
@@ -167,7 +301,10 @@ export default function Ragister() {
                   ),
                 },
               }}
+              sx={{ mb: 2.5 }}
             />
+
+            {/* Password */}
 
             <Typography fontWeight={600} sx={{ mb: 1 }}>
               Password
@@ -180,8 +317,12 @@ export default function Ragister() {
               placeholder="Enter your password"
               value={deta.password}
               onChange={handlchaneevent}
+              error={Boolean(errors.password)}
+              helperText={
+                errors.password ||
+                "Min 8 characters, uppercase, lowercase, number & special character"
+              }
               required
-              sx={{ mb: 2.5 }}
               slotProps={{
                 input: {
                   startAdornment: (
@@ -193,6 +334,7 @@ export default function Ragister() {
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
+                        type="button"
                         onClick={() => setshowpassword(!showpassword)}
                         edge="end"
                         aria-label="Toggle password visibility"
@@ -207,7 +349,11 @@ export default function Ragister() {
                   ),
                 },
               }}
+              sx={{ mb: 3 }}
             />
+
+            {/* Submit Button */}
+
             <Button
               type="submit"
               fullWidth
@@ -227,11 +373,17 @@ export default function Ragister() {
             >
               {loading ? "Registering..." : "Create Account"}
             </Button>
+
           </Box>
 
           {/* Login Link */}
-          <Typography textAlign="center" color="text.secondary" sx={{ mt: 3 }}>
+
+          <Typography
+            color="text.secondary"
+            sx={{ mt: 3, textAlign: "center" }}
+          >
             Already have an account?{" "}
+
             <Box
               component={Link}
               to="/"
@@ -246,9 +398,13 @@ export default function Ragister() {
             >
               Login Now
             </Box>
+
           </Typography>
+
         </Paper>
+
       </Container>
+
     </Box>
   );
 }

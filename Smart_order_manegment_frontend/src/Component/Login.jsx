@@ -1,4 +1,6 @@
+
 import React, { useState } from "react";
+
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -6,15 +8,17 @@ import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Container from "@mui/material/Container";
 import InputAdornment from "@mui/material/InputAdornment";
+import IconButton from "@mui/material/IconButton";
+import Alert from "@mui/material/Alert";
+
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import axios from "axios";
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
-import { Link, useNavigate } from "react-router-dom";
-import IconButton from "@mui/material/IconButton";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import Alert from "@mui/material/Alert";
+
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [deta, setdeta] = useState({
@@ -25,9 +29,12 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [showpassword, setshowpassword] = useState(false);
   const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
+    setError("");
+
     setdeta({
       ...deta,
       [e.target.name]: e.target.value,
@@ -36,24 +43,33 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setLoading(true);
     setError("");
 
     try {
       const res = await axios.post(
         "http://localhost:5600/auth/login-check",
-        deta,
+        deta
       );
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("username", res.data.data.username);
       localStorage.setItem("email", res.data.data.email);
 
-      alert("Login successful");
-      setdeta({ email: "", password: "" });
+      setdeta({
+        email: "",
+        password: "",
+      });
+
       navigate("/home");
+
     } catch (error) {
-      setError(error.response?.data?.message || "Invalid email or password");
+      setError(
+        error.response?.data?.message ||
+        "Invalid email or password"
+      );
+
     } finally {
       setLoading(false);
     }
@@ -80,6 +96,7 @@ export default function Login() {
             boxShadow: "0 12px 40px rgba(0,0,0,0.06)",
           }}
         >
+          {/* Heading */}
           <Box sx={{ textAlign: "center", mb: 4 }}>
             <Box
               sx={{
@@ -107,12 +124,15 @@ export default function Login() {
             </Typography>
           </Box>
 
+          {/* Login Form */}
           <Box component="form" onSubmit={handleSubmit}>
+
             {error && (
               <Alert severity="error" sx={{ mb: 2 }}>
                 {error}
               </Alert>
             )}
+
             <Typography fontWeight={600} sx={{ mb: 1 }}>
               Email Address
             </Typography>
@@ -160,8 +180,10 @@ export default function Login() {
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
+                        type="button"
                         onClick={() => setshowpassword(!showpassword)}
                         edge="end"
+                        aria-label="Toggle password visibility"
                       >
                         {showpassword ? (
                           <VisibilityOffIcon />
@@ -187,15 +209,22 @@ export default function Login() {
                 fontSize: "16px",
                 fontWeight: 600,
                 bgcolor: "#2563eb",
-                "&:hover": { bgcolor: "#1d4ed8" },
+                "&:hover": {
+                  bgcolor: "#1d4ed8",
+                },
               }}
             >
               {loading ? "Logging in..." : "Login"}
             </Button>
           </Box>
 
-          <Typography textAlign="center" color="text.secondary" sx={{ mt: 3 }}>
+          {/* Register Link */}
+          <Typography
+            color="text.secondary"
+            sx={{ mt: 3, textAlign: "center" }}
+          >
             Don't have an account?{" "}
+
             <Box
               component={Link}
               to="/ragister"
@@ -203,12 +232,15 @@ export default function Login() {
                 color: "#2563eb",
                 fontWeight: 600,
                 textDecoration: "none",
-                "&:hover": { textDecoration: "underline" },
+                "&:hover": {
+                  textDecoration: "underline",
+                },
               }}
             >
               Register Now
             </Box>
           </Typography>
+
         </Paper>
       </Container>
     </Box>

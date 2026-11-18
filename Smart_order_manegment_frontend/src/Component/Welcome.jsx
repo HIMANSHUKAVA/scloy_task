@@ -58,7 +58,7 @@ export default function Welcome() {
                 Contact
               </MenuItem>
 
-              <MenuItem onClick={() => handleMenuClick("/logout")}>
+              <MenuItem onClick={() => handleMenuClick("/")}>
                 Logout
               </MenuItem>
             </Menu>

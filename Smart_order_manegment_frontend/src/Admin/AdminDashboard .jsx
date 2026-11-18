@@ -57,7 +57,7 @@ export default function AdminDashboard() {
                 Orders
               </MenuItem>
 
-              <MenuItem onClick={() => handleMenuClick("/logout")}>
+              <MenuItem onClick={() => handleMenuClick("/")}>
                 Logout
               </MenuItem>
             </Menu>

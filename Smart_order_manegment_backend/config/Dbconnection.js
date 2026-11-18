@@ -4,7 +4,7 @@ export async function GetMongoConnection() {
     
     try {
         console.log("mongo connecting....");
-        await mongoose.connect("mongodb://localhost:27017/Health" , {
+        await mongoose.connect(process.env.MONGO_URL , {
             serverSelectionTimeoutMS: 5000,
         })
         console.log("mongodb connected");

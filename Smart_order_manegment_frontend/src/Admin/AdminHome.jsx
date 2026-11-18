@@ -21,7 +21,7 @@ export default function AdminHome() {
         },
       })
       .then((res) => {
-        console.log(res.data.data);
+        // console.log(res.data.data);
 
         setdeta(res.data.data);
       })

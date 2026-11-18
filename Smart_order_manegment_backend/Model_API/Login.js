@@ -1,4 +1,3 @@
-
 import jwt from "jsonwebtoken";
 import loginmodel from "../Model/LoginModel.js";
 
@@ -12,7 +11,7 @@ export function Generettoke(user) {
     process.env.JWT_SECRET,
     {
       expiresIn: "1h",
-    }
+    },
   );
 }
 
@@ -23,5 +22,11 @@ export async function RagisterAPI(user) {
 
 export async function LoginApi(email) {
   const result = await loginmodel.findOne({ email });
+  return result;
+}
+
+export async function GetRagisterdUser() {
+  const result = await loginmodel.find({role : "User"}).select("-password");
+
   return result;
 }

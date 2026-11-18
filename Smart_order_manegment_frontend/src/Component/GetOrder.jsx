@@ -11,6 +11,8 @@ import Paper from "@mui/material/Paper";
 
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import AdminDashboard from "../Admin/AdminDashboard ";
+import Box from "@mui/material/Box";
 
 export default function GetOrder() {
 
@@ -30,8 +32,11 @@ export default function GetOrder() {
 
   return (
     <>
-      <Typography variant="h4" sx={{ mb: 3 }}>
-        Order Details From Mongose Connection With Node Js + Express Js
+
+    <AdminDashboard/>
+      <Box sx={{mt:8}}>
+        <Typography variant="h4" sx={{ mb: 3 }}>
+        Order Details
       </Typography>
 
       <TableContainer component={Paper}>
@@ -63,6 +68,7 @@ export default function GetOrder() {
 
         </Table>
       </TableContainer>
+      </Box>
     </>
   );
 }

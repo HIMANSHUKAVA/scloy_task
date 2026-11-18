@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 
 import Typography from "@mui/material/Typography";
@@ -50,26 +49,29 @@ export default function Login() {
     try {
       const res = await axios.post(
         "http://localhost:5600/auth/login-check",
-        deta
+        deta,
       );
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("username", res.data.data.username);
       localStorage.setItem("email", res.data.data.email);
+      localStorage.setItem("role", res.data.data.role);
 
       setdeta({
         email: "",
         password: "",
       });
 
-      navigate("/home");
-
+      if (res.data.data.role === "User") {
+        navigate("/home");
+      } else if (res.data.data.role === "Admin") {
+        navigate("/admin/home");
+      } else {
+        localStorage.clear();
+        setError("Invalid user role");
+      }
     } catch (error) {
-      setError(
-        error.response?.data?.message ||
-        "Invalid email or password"
-      );
-
+      setError(error.response?.data?.message || "Invalid email or password");
     } finally {
       setLoading(false);
     }
@@ -126,7 +128,6 @@ export default function Login() {
 
           {/* Login Form */}
           <Box component="form" onSubmit={handleSubmit}>
-
             {error && (
               <Alert severity="error" sx={{ mb: 2 }}>
                 {error}
@@ -224,7 +225,6 @@ export default function Login() {
             sx={{ mt: 3, textAlign: "center" }}
           >
             Don't have an account?{" "}
-
             <Box
               component={Link}
               to="/ragister"
@@ -240,7 +240,6 @@ export default function Login() {
               Register Now
             </Box>
           </Typography>
-
         </Paper>
       </Container>
     </Box>

@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { Generettoke, LoginApi, RagisterAPI } from "../Model_API/Login.js";
+import { Generettoke, GetRagisterdUser, LoginApi, RagisterAPI } from "../Model_API/Login.js";
 import loginmodel from "../Model/LoginModel.js";
 
 export async function ragisteruser(req, resp) {
@@ -93,6 +93,23 @@ export async function loginuser(req, resp) {
   } catch (error) {
     return resp.status(500).json({
       message: error.message,
+    });
+  }
+}
+
+
+export async function getdeta(req, resp) {
+  try {
+    const result = await GetRagisterdUser();
+
+    return resp.status(200).json({
+      message: "Users fetched successfully",
+      data: result
+    });
+
+  } catch (error) {
+    return resp.status(500).json({
+      message: "Something went wrong"
     });
   }
 }

@@ -22,6 +22,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import EmailIcon from "@mui/icons-material/Email";
 import Switch from "@mui/material/Switch";
+import Swal from "sweetalert2";
 
 export default function AdminHome() {
   const [deta, setdeta] = useState([]);
@@ -60,32 +61,46 @@ export default function AdminHome() {
     navigate(`/admin/edit/${id}`);
   };
 
-  const HandlDeleteButton = (id) => {
-    const cr = confirm("Are you sure you want to delete");
+  const HandlDeleteButton = async (id) => {
+    const result = await Swal.fire({
+      title: "Do you want to delete?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Delete",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#d33",
+    });
 
-    if (cr) {
-      axios
-        .delete(`http://localhost:5600/auth/admin/deletebyid/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
+    if (result.isConfirmed) {
+      try {
+        const res = await axios.delete(
+          `http://localhost:5600/auth/admin/deletebyid/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        })
-        .then((res) => {
-          alert(res.data.message);
+        );
 
-          setdeta((prev) => {
-            const updated = prev.filter((e) => e._id !== id);
+        setdeta((prev) => {
+          const updated = prev.filter((e) => e._id !== id);
 
-            if (page > 0 && updated.length <= page * rowperpage) {
-              setpage(page - 1);
-            }
+          if (page > 0 && updated.length <= page * rowperpage) {
+            setpage(page - 1);
+          }
 
-            return updated;
-          });
-        })
-        .catch((er) => {
-          console.log(er.message);
+          return updated;
         });
+
+        Swal.fire("Deleted!", res.data.message, "success");
+      } catch (er) {
+        Swal.fire(
+          "Error!",
+          er.response?.data?.message || "Something went wrong",
+          "error",
+        );
+      }
     }
   };
 
@@ -101,7 +116,7 @@ export default function AdminHome() {
         },
       )
       .then((res) => {
-        alert(res.data.message);
+        Swal.fire("updated", res.data.message, "success");
 
         setdeta((prev) =>
           prev.map((user) =>
@@ -332,26 +347,26 @@ export default function AdminHome() {
                   </TableCell>
                 </TableRow>
               )}
+
+              <TableRow>
+                <TablePagination
+                  count={deta.length}
+                  page={page}
+                  rowsPerPage={rowperpage}
+                  onPageChange={HandlPageChange}
+                  onRowsPerPageChange={HandlChange}
+                  rowsPerPageOptions={[2, 4, 6]}
+                  colSpan={5}
+                  sx={{
+                    borderTop: "1px solid #e2e8f0",
+                    background: "#fafbff",
+                  }}
+                />
+              </TableRow>
             </TableBody>
           </Table>
 
           {/* Pagination */}
-
-          <Box
-            sx={{
-              borderTop: "1px solid #e2e8f0",
-              background: "#fafbff",
-            }}
-          >
-            <TablePagination
-              count={deta.length}
-              page={page}
-              rowsPerPage={rowperpage}
-              onPageChange={HandlPageChange}
-              onRowsPerPageChange={HandlChange}
-              rowsPerPageOptions={[2, 4, 6]}
-            />
-          </Box>
         </TableContainer>
       </Box>
     </>

@@ -9,6 +9,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { Link, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 export default function Welcome() {
   const [open, setopen] = useState(false);
   const [anchoel, setanchoel] = useState(null);
@@ -18,10 +19,14 @@ export default function Welcome() {
 
   const navigate = useNavigate();
   const handllogout = () => {
+    Swal.fire({
+      title: "log-out",
+      text: "you have successfully logout",
+      icon: "success",
+    });
     localStorage.removeItem("token");
     localStorage.removeItem("username");
     localStorage.removeItem("email");
-    alert("you have successfully logout");
     navigate("/");
   };
 
@@ -58,9 +63,7 @@ export default function Welcome() {
                 Contact
               </MenuItem>
 
-              <MenuItem onClick={() => handleMenuClick("/")}>
-                Logout
-              </MenuItem>
+              <MenuItem onClick={() => handleMenuClick("/")}>Logout</MenuItem>
             </Menu>
           </Box>
           {/* Desktop Menu */}

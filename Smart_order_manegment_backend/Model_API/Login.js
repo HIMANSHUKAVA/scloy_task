@@ -38,6 +38,17 @@ export async function GetUserById(id) {
 }
 
 export async function UpdateById(id, user) {
+
+
+  const existing_user =await  loginmodel.findOne({
+    email : user.email,
+    _id : {$ne: id},
+  })
+
+  if (existing_user) {
+    throw new Error("Email already registered. Please use a different email.");
+  }
+
   const result = await loginmodel.findByIdAndUpdate(id, user, {
     new: true,
     runValidators: true,

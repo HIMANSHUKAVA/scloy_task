@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 
 import Typography from "@mui/material/Typography";
@@ -19,9 +18,9 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 export default function Ragister() {
-
   const [deta, setdeta] = useState({
     username: "",
     email: "",
@@ -37,9 +36,7 @@ export default function Ragister() {
 
   // Individual field validation
   const validateField = (name, value) => {
-
     switch (name) {
-
       case "username":
         if (!value.trim()) {
           return "Username is required";
@@ -100,7 +97,6 @@ export default function Ragister() {
 
   // Handle input changes
   const handlchaneevent = (e) => {
-
     const { name, value } = e.target;
 
     setdeta((prev) => ({
@@ -118,7 +114,6 @@ export default function Ragister() {
 
   // Validate all fields
   const validateForm = () => {
-
     const newErrors = {};
 
     Object.keys(deta).forEach((key) => {
@@ -132,7 +127,6 @@ export default function Ragister() {
 
   // Submit form
   const handleSubmit = async (e) => {
-
     e.preventDefault();
 
     if (!validateForm()) {
@@ -143,7 +137,6 @@ export default function Ragister() {
     setError("");
 
     try {
-
       const payload = {
         username: deta.username.trim(),
         email: deta.email.trim().toLowerCase(),
@@ -152,7 +145,7 @@ export default function Ragister() {
 
       const res = await axios.post(
         "http://localhost:5600/auth/ragister",
-        payload
+        payload,
       );
 
       localStorage.setItem("token", res.data.token);
@@ -168,23 +161,25 @@ export default function Ragister() {
 
       setErrors({});
 
+      Swal.fire({
+        text: res.data.message,
+        icon: "success",
+        title: "Ragisterd",
+      });
+
       navigate("/home");
-
     } catch (er) {
-
-      setError(
-        er.response?.data?.message || "Registration failed"
-      );
-
+      Swal.fire({
+        icon: "error",
+        title: "Ragisterd Failed!",
+        text: er.response?.data?.message || "Registration failed",
+      });
     } finally {
-
       setLoading(false);
-
     }
   };
 
   return (
-
     <Box
       sx={{
         minHeight: "100vh",
@@ -195,9 +190,7 @@ export default function Ragister() {
         py: 4,
       }}
     >
-
       <Container maxWidth="sm">
-
         <Paper
           elevation={0}
           sx={{
@@ -207,11 +200,9 @@ export default function Ragister() {
             boxShadow: "0 12px 40px rgba(0,0,0,0.06)",
           }}
         >
-
           {/* Heading */}
 
           <Box sx={{ textAlign: "center", mb: 4 }}>
-
             <Box
               sx={{
                 width: 55,
@@ -236,13 +227,11 @@ export default function Ragister() {
             <Typography color="text.secondary" sx={{ mt: 1 }}>
               Register to get started
             </Typography>
-
           </Box>
 
           {/* Registration Form */}
 
           <Box component="form" onSubmit={handleSubmit} noValidate>
-
             {error && (
               <Alert severity="error" sx={{ mb: 2 }}>
                 {error}
@@ -373,7 +362,6 @@ export default function Ragister() {
             >
               {loading ? "Registering..." : "Create Account"}
             </Button>
-
           </Box>
 
           {/* Login Link */}
@@ -383,7 +371,6 @@ export default function Ragister() {
             sx={{ mt: 3, textAlign: "center" }}
           >
             Already have an account?{" "}
-
             <Box
               component={Link}
               to="/"
@@ -398,13 +385,9 @@ export default function Ragister() {
             >
               Login Now
             </Box>
-
           </Typography>
-
         </Paper>
-
       </Container>
-
     </Box>
   );
 }

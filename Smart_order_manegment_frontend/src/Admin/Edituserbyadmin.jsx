@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import AdminDashboard from "./AdminDashboard ";
 import Box from "@mui/material/Box";
@@ -7,7 +6,7 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-
+import SnackBar from "../Component/SnackBar";
 import EmailIcon from "@mui/icons-material/Email";
 import PersonIcon from "@mui/icons-material/Person";
 import TextField from "@mui/material/TextField";
@@ -18,9 +17,12 @@ import Stack from "@mui/material/Stack";
 
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
+import Swal from "sweetalert2";
 
 export default function Edituserbyadmin() {
   const { id } = useParams();
+
+  const [open, setopen] = useState(false);
 
   const [deta, setdeta] = useState({
     username: "",
@@ -76,14 +78,30 @@ export default function Edituserbyadmin() {
       })
       .then((res) => {
         console.log(res.data);
-        alert("Data updated successfully");
-
-        setTimeout(() => {
+        Swal.fire({
+          // title: "sucess",
+          text: "updated successfully",
+          icon: "success",
+        });
           naviagate("/admin/home");
-        }, 2000);
+
       })
       .catch((er) => {
-        console.log(er);
+        if (er.response?.status === 409) {
+          
+
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Email already registered. Please use a different email.",
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Something went wrong. Please try again.",
+          });
+        }
       })
       .finally(() => {
         setbuttonstate(false);
@@ -121,11 +139,7 @@ export default function Edituserbyadmin() {
           >
             {/* Heading */}
 
-            <Stack
-              alignItems="center"
-              spacing={1.5}
-              sx={{ mb: 4 }}
-            >
+            <Stack alignItems="center" spacing={1.5} sx={{ mb: 4 }}>
               <Avatar
                 sx={{
                   width: 65,
@@ -137,28 +151,18 @@ export default function Edituserbyadmin() {
                 <EditIcon sx={{ fontSize: 32 }} />
               </Avatar>
 
-              <Typography
-                variant="h4"
-                fontWeight={800}
-                color="#1e293b"
-              >
+              <Typography variant="h4" fontWeight={800} color="#1e293b">
                 Edit User
               </Typography>
 
-              <Typography
-                variant="body2"
-                color="text.secondary"
-              >
+              <Typography variant="body2" color="text.secondary">
                 Update registered user information
               </Typography>
             </Stack>
 
             {/* Form */}
 
-            <Box
-              component="form"
-              onSubmit={HandlSubmit}
-            >
+            <Box component="form" onSubmit={HandlSubmit}>
               {field.map((s) => (
                 <TextField
                   key={s.id}

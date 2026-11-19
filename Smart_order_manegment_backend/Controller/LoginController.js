@@ -151,22 +151,30 @@ export async function findbyid(req, resp) {
 export async function updatebyid(req, resp) {
   try {
     const id = req.params.id;
-
     const { username, email } = req.body;
+
     const result = await UpdateById(id, { username, email });
 
     if (!result) {
-      resp.status(500).json({
-        message: "may be id or body not found",
+      return resp.status(404).json({
+        message: "User not found",
       });
     }
 
-    resp.status(200).json({
-      deta: result,
+    return resp.status(200).json({
+      message: "User updated successfully",
+      data: result,
     });
   } catch (error) {
-    resp.status(500).json({
-      message: "update method occured problem catch block executed",
+    if (error.message.includes("Email already registered")) {
+       resp.status(409).json({
+        message: error.message,
+      });
+    }
+
+    return resp.status(500).json({
+      message: "Update method failed",
+      error: error.message,
     });
   }
 }

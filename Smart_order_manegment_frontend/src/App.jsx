@@ -32,7 +32,6 @@ export default function App() {
         {/* Admin Protected Routes */}
         <Route element={<ProtectedRoute allowedRole="Admin" />}>
           <Route path="/admin/home" element={<AdminHome/>} />
-          <Route path="/admin/order" element={<GetOrder/>} />
           <Route path="/admin/edit/:id" element={<Edituserbyadmin/>}/>
         </Route>
       </Routes>

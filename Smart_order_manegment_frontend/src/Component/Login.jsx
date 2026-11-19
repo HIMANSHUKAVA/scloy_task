@@ -18,6 +18,8 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import SnackBar from "./SnackBar";
+import Swal from "sweetalert2";
 
 export default function Login() {
   const [deta, setdeta] = useState({
@@ -31,6 +33,7 @@ export default function Login() {
 
   const navigate = useNavigate();
 
+  
   const handleChange = (e) => {
     setError("");
 
@@ -57,31 +60,37 @@ export default function Login() {
       localStorage.setItem("email", res.data.data.email);
       localStorage.setItem("role", res.data.data.role);
 
-    
-
       setdeta({
         email: "",
         password: "",
       });
 
-      alert(res.data.message)
+
+        Swal.fire("log in", res.data.message, "success");
       if (res.data.data.role === "User") {
-        navigate("/home");
+          navigate("/home");
+        
       } else if (res.data.data.role === "Admin") {
-        navigate("/admin/home");
+        
+          navigate("/admin/home");
+        
       } else {
         localStorage.clear();
         setError("Invalid user role");
       }
     } catch (error) {
       setError(error.response?.data?.message || "Invalid email or password");
+      Swal.fire({
+        icon : "error",
+        title : "wrong...",
+        text : error.response?.data?.message || "Invalid email or password",
+
+      })
     } finally {
       setLoading(false);
     }
   };
 
-
-  
   return (
     <Box
       sx={{
@@ -223,6 +232,7 @@ export default function Login() {
               {loading ? "Logging in..." : "Login"}
             </Button>
           </Box>
+        
 
           {/* Register Link */}
           <Typography

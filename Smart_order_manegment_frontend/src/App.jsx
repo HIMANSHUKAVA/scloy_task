@@ -13,6 +13,7 @@ import ProtectedRoute from "./Component/ProtectedRoute";
 import AdminDashboard from "./Admin/AdminDashboard ";
 import AdminHome from "./Admin/AdminHome"
 import GetOrder from "./Component/GetOrder"
+import Edituserbyadmin from "./Admin/Edituserbyadmin";
 export default function App() {
   return (
     <BrowserRouter>
@@ -32,6 +33,7 @@ export default function App() {
         <Route element={<ProtectedRoute allowedRole="Admin" />}>
           <Route path="/admin/home" element={<AdminHome/>} />
           <Route path="/admin/order" element={<GetOrder/>} />
+          <Route path="/admin/edit/:id" element={<Edituserbyadmin/>}/>
         </Route>
       </Routes>
     </BrowserRouter>

@@ -9,6 +9,10 @@ const loginschema = mongoose.Schema({
     enum: ["User", "Admin"],
     default: "User",
   },
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 export default loginschema;

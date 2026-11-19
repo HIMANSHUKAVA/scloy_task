@@ -57,11 +57,14 @@ export default function Login() {
       localStorage.setItem("email", res.data.data.email);
       localStorage.setItem("role", res.data.data.role);
 
+    
+
       setdeta({
         email: "",
         password: "",
       });
 
+      alert(res.data.message)
       if (res.data.data.role === "User") {
         navigate("/home");
       } else if (res.data.data.role === "Admin") {
@@ -77,6 +80,8 @@ export default function Login() {
     }
   };
 
+
+  
   return (
     <Box
       sx={{

@@ -1,5 +1,14 @@
 import bcrypt from "bcryptjs";
-import { Generettoke, GetRagisterdUser, LoginApi, RagisterAPI } from "../Model_API/Login.js";
+import {
+  DeleteById,
+  Generettoke,
+  GetRagisterdUser,
+  GetUserById,
+  LoginApi,
+  RagisterAPI,
+  ToggleActiveButton,
+  UpdateById,
+} from "../Model_API/Login.js";
 import loginmodel from "../Model/LoginModel.js";
 
 export async function ragisteruser(req, resp) {
@@ -70,6 +79,12 @@ export async function loginuser(req, resp) {
       });
     }
 
+    if (result.isActive === false) {
+      return resp.status(500).json({
+        message: "Admin Disabled Your Login Account Try Some Time Later",
+      });
+    }
+
     const matched = await bcrypt.compare(password, result.password);
 
     if (!matched) {
@@ -97,19 +112,101 @@ export async function loginuser(req, resp) {
   }
 }
 
-
 export async function getdeta(req, resp) {
   try {
     const result = await GetRagisterdUser();
 
     return resp.status(200).json({
       message: "Users fetched successfully",
-      data: result
+      data: result,
     });
-
   } catch (error) {
     return resp.status(500).json({
-      message: "Something went wrong"
+      message: "Something went wrong",
+    });
+  }
+}
+
+export async function findbyid(req, resp) {
+  try {
+    const id = req.params.id;
+    const result = await GetUserById(id);
+
+    if (!result) {
+      resp.status(500).json({
+        message: "User Not FOounr",
+      });
+    }
+    resp.status(201).json({
+      message: "user found",
+      deta: result,
+    });
+  } catch (error) {
+    resp.status(500).json({
+      message: "id method occured problem catch block executed",
+    });
+  }
+}
+
+export async function updatebyid(req, resp) {
+  try {
+    const id = req.params.id;
+
+    const { username, email } = req.body;
+    const result = await UpdateById(id, { username, email });
+
+    if (!result) {
+      resp.status(500).json({
+        message: "may be id or body not found",
+      });
+    }
+
+    resp.status(200).json({
+      deta: result,
+    });
+  } catch (error) {
+    resp.status(500).json({
+      message: "update method occured problem catch block executed",
+    });
+  }
+}
+
+export async function deletebyid(req, resp) {
+  try {
+    const id = req.params.id;
+    const result = DeleteById(id);
+    resp.status(201).json({
+      message: "User Deleted",
+    });
+  } catch (error) {
+    resp.status(500).json({
+      message: "Error Occured by Deletd method",
+    });
+  }
+}
+
+export async function togglebutton(req, resp) {
+  const id = req.params.id;
+  const { isActive } = req.body;
+
+  try {
+    const result = await ToggleActiveButton(id, isActive);
+
+    if (!result) {
+      return resp.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    return resp.status(200).json({
+      message: result.isActive
+        ? "User enabled successfully"
+        : "User disabled successfully",
+      isActive: result.isActive,
+    });
+  } catch (error) {
+    return resp.status(500).json({
+      message: error.message,
     });
   }
 }

@@ -26,7 +26,41 @@ export async function LoginApi(email) {
 }
 
 export async function GetRagisterdUser() {
-  const result = await loginmodel.find({role : "User"}).select("-password");
+  const result = await loginmodel.find({ role: "User" }).select("-password");
 
+  return result;
+}
+
+export async function GetUserById(id) {
+  const result = await loginmodel.findById(id);
+
+  return result;
+}
+
+export async function UpdateById(id, user) {
+  const result = await loginmodel.findByIdAndUpdate(id, user, {
+    new: true,
+    runValidators: true,
+  });
+
+  return result;
+}
+
+export async function DeleteById(id) {
+  const result = await loginmodel.findByIdAndDelete(id);
+
+  return result;
+}
+
+export async function ToggleActiveButton(id , isActive) {
+  const result = await loginmodel.findByIdAndUpdate(
+    id,
+    {
+      $set: {
+        isActive: isActive,
+      },
+    },
+    { new: true, runValidators: true },
+  );
   return result;
 }

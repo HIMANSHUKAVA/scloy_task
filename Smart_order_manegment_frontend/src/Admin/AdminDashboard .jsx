@@ -131,13 +131,12 @@ export default function AdminDashboard() {
 
               {/* Mobile Product */}
               <MenuItem
-                onClick={() => setMobileProductOpen(!mobileProductOpen)}
+                onClick={() => handleMenuClick("/admin/view-product")}
               >
-                Product
-                <ExpandMoreIcon sx={{ ml: "auto" }} />
+                Product Link
               </MenuItem>
 
-              <Collapse in={mobileProductOpen} unmountOnExit timeout="auto">
+              {/* <Collapse in={mobileProductOpen} unmountOnExit timeout="auto">
                 <MenuItem
                   sx={{ pl: 4 }}
                   onClick={() => handleMenuClick("/admin/add-product")}
@@ -150,7 +149,7 @@ export default function AdminDashboard() {
                 >
                   View Product
                 </MenuItem>
-              </Collapse>
+              </Collapse> */}
 
               <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
@@ -162,15 +161,15 @@ export default function AdminDashboard() {
               Users
             </Button>
 
-            <Button color="inherit" onMouseEnter={handleProductOpen}>
-              Product
+            <Button color="inherit" component={Link} to="/admin/view-product">
+              Product Link
             </Button>
 
             <Button color="inherit" onClick={handleLogout}>
               Logout
             </Button>
 
-            <ReusableMenu anchorEl={productOpen} onClose={handleProductClose} />
+            {/* <ReusableMenu anchorEl={productOpen} onClose={handleProductClose} /> */}
           </Box>
         </Toolbar>
       </AppBar>

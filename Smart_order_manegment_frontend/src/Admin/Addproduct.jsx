@@ -81,11 +81,11 @@ export default function Addproduct() {
       errors.sku = "SKU is required";
     }
 
-    if (!product.description.trim()) {
-      errors.description = "Description is required";
-    } else if (product.description.trim().length < 10) {
-      errors.description = "Minimum 10 characters required";
-    }
+    // if (!product.description.trim()) {
+    //   errors.description = "Description is required";
+    // } else if (product.description.trim().length < 10) {
+    //   errors.description = "Minimum 10 characters required";
+    // }
 
     if (!product.price || Number(product.price) <= 0) {
       errors.price = "Enter a valid price";

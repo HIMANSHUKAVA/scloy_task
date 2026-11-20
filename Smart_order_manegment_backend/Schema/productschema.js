@@ -24,8 +24,6 @@ const product_schema = new mongoose.Schema(
 
     description: {
       type: String,
-      required: true,
-      trim: true,
     },
 
     stock: {

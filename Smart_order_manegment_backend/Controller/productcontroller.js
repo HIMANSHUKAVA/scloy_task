@@ -58,8 +58,7 @@ export async function saveproduct(req, resp) {
       stock
     } = req.body;
 
-    if (!productName || !sku || price === undefined ||
-        !description || stock === undefined) {
+    if (!productName || !sku || price === undefined || stock === undefined) {
       if (req.file) {
         await deleteImage(req.file.filename);
       }

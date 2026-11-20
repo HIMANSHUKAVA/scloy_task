@@ -3,8 +3,10 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { GetMongoConnection } from "./config/Dbconnection.js";
+
 import router from "./Route/OrderRoute.js";
 import login_router from "./Route/LoginRoute.js";
+import product_router from "./Route/Productroute.js";
 
 dotenv.config();
 
@@ -47,12 +49,16 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve uploaded product images
+app.use("/uploads", express.static("uploads"));
+
 // Database Connection
 await GetMongoConnection();
 
 // Routes
 app.use("/api", router);
 app.use("/auth", login_router);
+app.use("/view", product_router);
 
 // Server
 app.listen(5600, () => {

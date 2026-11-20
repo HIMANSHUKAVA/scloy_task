@@ -63,6 +63,11 @@ export default function Welcome() {
                 Contact
               </MenuItem>
 
+
+              <MenuItem onClick={() => handleMenuClick("/view-product")}>
+                product
+              </MenuItem>
+
               <MenuItem onClick={() => handleMenuClick("/")}>Logout</MenuItem>
             </Menu>
           </Box>
@@ -77,6 +82,11 @@ export default function Welcome() {
             <Button color="inherit" component={Link} to="/contect">
               Contact
             </Button>
+
+            <Button color="inherit" component={Link} to="/view-product">
+              Product
+            </Button>
+            
             <Button color="inherit" onClick={handllogout}>
               Logout
             </Button>

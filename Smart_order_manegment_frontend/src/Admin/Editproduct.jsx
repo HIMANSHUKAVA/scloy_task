@@ -15,6 +15,7 @@ import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
+import AdminDrawer from "./AdminDrawer";
 
 export default function Editproduct() {
   const [product, setProduct] = useState([]);
@@ -135,7 +136,7 @@ export default function Editproduct() {
   };
   return (
     <>
-      <AdminDashboard />
+      <AdminDrawer>
 
       <Box
         sx={{
@@ -354,6 +355,7 @@ export default function Editproduct() {
           </Grid>
         </Box>
       </Box>
+      </AdminDrawer>
     </>
   );
 }

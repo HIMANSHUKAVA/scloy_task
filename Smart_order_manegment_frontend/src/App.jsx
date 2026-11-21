@@ -16,6 +16,10 @@ import Addproduct from "./Admin/Addproduct"
 import Viewproduct from "./Admin/Viewproduct"
 import Editproduct from "./Admin/Editproduct"
 import ViewProduct from "./Pages/ViewProduct";
+import Drawers1 from "./Component/Drawers1";
+import Singleview from "./Admin/Singleview";
+import AdminDrawer from "./Admin/AdminDrawer"
+import SingleViewByUser from "./Pages/SingleViewByUser"
 export default function App() {
   return (
     <BrowserRouter>
@@ -23,6 +27,8 @@ export default function App() {
         {/* Public Routes */}
         <Route path="/" element={<Login />} />
         <Route path="/ragister" element={<Ragister />} />
+        <Route path="/drawer" element={<Drawers1/>}/>
+        <Route path="/admindrawer" element={<AdminDrawer/>}/>
 
         {/* User Protected Routes */}
         <Route element={<ProtectedRoute allowedRole="User" />}>
@@ -30,6 +36,7 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contect" element={<Contect />} />
           <Route path="/view-product" element={<ViewProduct/>}/>
+          <Route path="/view-single/:id" element={<SingleViewByUser/>}/>
         </Route>
 
         {/* Admin Protected Routes */}
@@ -39,6 +46,7 @@ export default function App() {
           <Route path="/admin/add-product" element={<Addproduct/>} />
           <Route path="/admin/view-product" element={<Viewproduct/>}/>
           <Route path="/admin/edit-product/:id" element={<Editproduct/>}/>
+          <Route path="/admin/single/view/:id" element={<Singleview/>}/>
         </Route>
       </Routes>
     </BrowserRouter>

@@ -24,6 +24,14 @@ product_router.get(
   viewproducts,
 );
 
+product_router.get(
+  "/product/user/single-view/:id",
+  VarifyTokenMiddlware,
+  HasRoleMiddlware("User"),
+  FindByuserid
+);
+
+
 // ADMIN: Add Product
 product_router.post(
   "/addproduct",

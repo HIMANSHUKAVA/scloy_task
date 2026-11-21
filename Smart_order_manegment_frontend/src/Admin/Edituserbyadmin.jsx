@@ -18,6 +18,7 @@ import Stack from "@mui/material/Stack";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import Swal from "sweetalert2";
+import AdminDrawer from "./AdminDrawer";
 
 export default function Edituserbyadmin() {
   const { id } = useParams();
@@ -110,7 +111,7 @@ export default function Edituserbyadmin() {
 
   return (
     <>
-      <AdminDashboard />
+      <AdminDrawer>
 
       <Box
         sx={{
@@ -240,6 +241,7 @@ export default function Edituserbyadmin() {
           </Paper>
         </Container>
       </Box>
+      </AdminDrawer>
     </>
   );
 }

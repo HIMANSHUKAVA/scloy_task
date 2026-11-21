@@ -119,6 +119,8 @@ export async function saveproduct(req, resp) {
 }
 
 
+
+
 // 2. VIEW ALL PRODUCTS
 export async function viewproducts(req, resp) {
   try {

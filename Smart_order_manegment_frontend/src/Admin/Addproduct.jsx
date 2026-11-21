@@ -14,6 +14,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
+import AdminDrawer from "./AdminDrawer";
 export default function Addproduct() {
   const [product, setProduct] = useState({
     productName: "",
@@ -179,8 +180,7 @@ export default function Addproduct() {
 };
   return (
     <>
-      <AdminDashboard />
-
+<AdminDrawer>
       <Box
         sx={{
           background: "#f5f7fb",
@@ -428,6 +428,7 @@ export default function Addproduct() {
           </Grid>
         </Box>
       </Box>
+      </AdminDrawer>
     </>
   );
 }

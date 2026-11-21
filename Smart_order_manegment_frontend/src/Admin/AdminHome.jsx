@@ -23,6 +23,7 @@ import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import EmailIcon from "@mui/icons-material/Email";
 import Switch from "@mui/material/Switch";
 import Swal from "sweetalert2";
+import AdminDrawer from "./AdminDrawer";
 
 export default function AdminHome() {
   const [deta, setdeta] = useState([]);
@@ -131,7 +132,7 @@ export default function AdminHome() {
 
   return (
     <>
-      <AdminDashboard />
+      <AdminDrawer>
 
       <Box
         sx={{
@@ -369,6 +370,7 @@ export default function AdminHome() {
           {/* Pagination */}
         </TableContainer>
       </Box>
+      </AdminDrawer>
     </>
   );
 }

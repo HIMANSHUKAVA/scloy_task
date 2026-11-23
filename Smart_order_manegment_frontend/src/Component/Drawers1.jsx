@@ -21,7 +21,10 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import LogoutIcon from "@mui/icons-material/Logout";
 import Swal from "sweetalert2";
-
+import WorkIcon from "@mui/icons-material/Work";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import axios from "axios"
 export default function Drawers1({ children }) {
   const [open, setopen] = useState(true);
 
@@ -35,6 +38,7 @@ export default function Drawers1({ children }) {
     { text: "About", icon: <InfoIcon />, to: "/about" },
     { text: "Contact", icon: <PhoneIcon />, to: "/contect" },
     { text: "Products", icon: <Inventory2Icon />, to: "/view-product" },
+    { text: "My Orders", icon: <WorkIcon />, to: "/user/myorder" },
     { text: "LOG OUT", icon: <LogoutIcon /> },
   ];
 
@@ -92,7 +96,18 @@ export default function Drawers1({ children }) {
         ))}
       </List>
     </>
-  );
+
+);
+
+
+
+  const handlwishlist = ()=>{
+   navigate("/wishlist")
+  }
+
+  const handlcart = ()=>{
+    navigate("/cart")
+  }
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -116,6 +131,16 @@ export default function Drawers1({ children }) {
           </IconButton>
 
           <Typography variant="h6">My Dashboard</Typography>
+
+          <Box sx={{ display: "flex", ml: "auto" }}>
+            <IconButton onClick={handlwishlist}>
+              <FavoriteIcon sx={{ color: "red" }} />
+            </IconButton>
+
+            <IconButton onClick={handlcart}>
+              <AddShoppingCartIcon sx={{ color: "blue" }} />
+            </IconButton>
+          </Box>
         </Toolbar>
       </AppBar>
 

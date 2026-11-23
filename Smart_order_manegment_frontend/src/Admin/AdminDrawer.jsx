@@ -47,6 +47,12 @@ export default function AdminDrawer({ children }) {
       icon: <Inventory2Icon />,
       to: "/admin/view-product",
     },
+    {
+      id:3,
+      text : "Order",
+      icon: <Inventory2Icon/>,
+      to : "/admin/vieworder"
+    },
     { id: 3, text: "LogOut", icon: <LogoutIcon /> },
   ];
 

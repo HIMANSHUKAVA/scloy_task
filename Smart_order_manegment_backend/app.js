@@ -4,9 +4,12 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { GetMongoConnection } from "./config/Dbconnection.js";
 
-import router from "./Route/OrderRoute.js";
+
 import login_router from "./Route/LoginRoute.js";
 import product_router from "./Route/Productroute.js";
+import order_router from "./Route/OrderRoutes.js"
+import wish_route from "./Route/WishliistRoute.js"
+import cart_route from "./Route/CartRoute.js";
 
 dotenv.config();
 
@@ -56,10 +59,11 @@ app.use("/uploads", express.static("uploads"));
 await GetMongoConnection();
 
 // Routes
-app.use("/api", router);
 app.use("/auth", login_router);
 app.use("/view", product_router);
-
+app.use("/order" , order_router)
+app.use("/wish" , wish_route)
+app.use("/cart" , cart_route)
 // Server
 app.listen(5600, () => {
   console.log("Server running on port 5600");

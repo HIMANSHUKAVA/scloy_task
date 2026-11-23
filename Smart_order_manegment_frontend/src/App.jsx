@@ -20,6 +20,9 @@ import Drawers1 from "./Component/Drawers1";
 import Singleview from "./Admin/Singleview";
 import AdminDrawer from "./Admin/AdminDrawer"
 import SingleViewByUser from "./Pages/SingleViewByUser"
+import Myorder from "./Pages/Myorder"
+import Wishlist from "./Pages/Wishlist";
+import ViewOrder from "./Admin/ViewOrder";
 export default function App() {
   return (
     <BrowserRouter>
@@ -37,6 +40,9 @@ export default function App() {
           <Route path="/contect" element={<Contect />} />
           <Route path="/view-product" element={<ViewProduct/>}/>
           <Route path="/view-single/:id" element={<SingleViewByUser/>}/>
+          <Route path="/user/myorder" element={<Myorder/>}/>
+          <Route path="/wishlist" element={<Wishlist/>}/>
+          
         </Route>
 
         {/* Admin Protected Routes */}
@@ -47,6 +53,7 @@ export default function App() {
           <Route path="/admin/view-product" element={<Viewproduct/>}/>
           <Route path="/admin/edit-product/:id" element={<Editproduct/>}/>
           <Route path="/admin/single/view/:id" element={<Singleview/>}/>
+          <Route path="/admin/vieworder" element={<ViewOrder/>}/>
         </Route>
       </Routes>
     </BrowserRouter>

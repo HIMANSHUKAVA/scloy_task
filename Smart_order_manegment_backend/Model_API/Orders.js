@@ -234,6 +234,9 @@ export async function Aproved_Request(orderid, adminid) {
 
     // Step 2: Restore stock
     for (const item of result.products) {
+      console.log("Order ID:", orderid);
+      console.log("Admin ID:", adminid);
+      console.log("Product Model:", product_model.modelName);
       const updatedProduct = await product_model.findByIdAndUpdate(
         item.productId,
         {
@@ -241,7 +244,7 @@ export async function Aproved_Request(orderid, adminid) {
             stock: item.quantity,
           },
         },
-        { session },
+        { session  , new:true},
       );
 
       if (!updatedProduct) {

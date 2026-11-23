@@ -124,6 +124,7 @@ export async function cancelrequest(req, resp) {
   }
 }
 
+
 export async function aproverd_request(req, resp) {
   const orderid = req.params.id;
   const adminid = req.user.user_id;
@@ -131,18 +132,24 @@ export async function aproverd_request(req, resp) {
   try {
     const result = await Aproved_Request(orderid, adminid);
 
-    if (result) {
-      return resp.status(200).json({
-        deta: result,
-        message: "request approved",
+    if (!result) {
+      return resp.status(404).json({
+        message: "Order not found or request already processed",
       });
     }
+
+    return resp.status(200).json({
+      deta: result,
+      message: "Cancellation request approved successfully",
+    });
+
   } catch (error) {
-    resp.status(500).json({
+    return resp.status(500).json({
       message: error.message,
     });
   }
 }
+
 
 export async function reject(req, resp) {
   try {

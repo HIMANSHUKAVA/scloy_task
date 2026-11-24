@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Drawers1 from "../Component/Drawers1";
 import Swal from "sweetalert2";
 import { motion } from "framer-motion";
-
+import axios from "axios";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
@@ -82,36 +82,45 @@ export default function Contect() {
   };
 
   // Submit form
-  const HandleSubmit = (e) => {
+
+  const HandleSubmit = async (e) => {
     e.preventDefault();
 
     if (!ValidateForm()) return;
 
     setLoading(true);
 
+    const payload = {
+      userid: localStorage.getItem("userId"),
+      email: formData.email.trim(),
+      subject: formData.subject.trim(),
+      message: formData.message.trim(),
+    };
+
+    console.log("Sending Payload:", payload);
+
     try {
-      const existingMessages = JSON.parse(
-        localStorage.getItem("contactMessages") || "[]",
-      );
+      const token = localStorage.getItem("token");
 
-      const newContact = {
-        id: Date.now(),
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        subject: formData.subject.trim(),
-        message: formData.message.trim(),
-        createdAt: new Date().toISOString(),
-        status: "Pending",
-      };
 
-      localStorage.setItem(
-        "contactMessages",
-        JSON.stringify([newContact, ...existingMessages]),
+      const response = await axios.post(
+        "http://localhost:5600/contect/user/contect/add",
+        {
+          payload,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
       );
 
       Swal.fire({
         title: "Message Submitted!",
-        text: "Your contact message has been saved successfully.",
+        text:
+          response.data.message ||
+          "Your message has been submitted successfully.",
         icon: "success",
         confirmButtonColor: "#253b80",
       });
@@ -124,11 +133,12 @@ export default function Contect() {
 
       setErrors({});
     } catch (error) {
-      console.log(error);
+      console.log("STATUS:", error.response?.status);
+      console.log("BACKEND ERROR:", error.response?.data);
 
       Swal.fire({
         title: "Something went wrong!",
-        text: "Unable to save your message.",
+        text: error.response?.data?.message || "Unable to submit your message.",
         icon: "error",
         confirmButtonColor: "#253b80",
       });

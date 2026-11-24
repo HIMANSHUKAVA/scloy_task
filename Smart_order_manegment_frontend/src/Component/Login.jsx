@@ -59,6 +59,11 @@ export default function Login() {
       localStorage.setItem("username", res.data.data.username);
       localStorage.setItem("email", res.data.data.email);
       localStorage.setItem("role", res.data.data.role);
+      localStorage.setItem("userId" , res.data.data.id);
+
+      // console.log("user id" , res.data.data.id);
+      
+      
 
       setdeta({
         email: "",

@@ -12,7 +12,7 @@ import product_router from "./Route/Productroute.js";
 import order_router from "./Route/OrderRoutes.js";
 import wish_route from "./Route/WishliistRoute.js";
 import cart_route from "./Route/CartRoute.js";
-
+import contect_router from "./Route/contect_route.js"
 dotenv.config();
 
 const app = express();
@@ -91,7 +91,7 @@ app.use("/view", product_router);
 app.use("/order", order_router);
 app.use("/wish", wish_route);
 app.use("/cart", cart_route);
-
+app.use("/contect" , contect_router);
 // Start Server
 http_server.listen(5600, () => {
   console.log("Server running on port 5600");

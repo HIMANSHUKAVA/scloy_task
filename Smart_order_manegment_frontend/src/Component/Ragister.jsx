@@ -152,7 +152,7 @@ export default function Ragister() {
       localStorage.setItem("role", res.data.data.role);
       localStorage.setItem("username", res.data.data.username);
       localStorage.setItem("email", res.data.data.email);
-
+      localStorage.setItem("userId" , res.data.data._id);
       setdeta({
         username: "",
         email: "",

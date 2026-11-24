@@ -30,7 +30,7 @@ import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import NotificationsNoneRoundedIcon from "@mui/icons-material/NotificationsNoneRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
-
+import PhoneIcon from '@mui/icons-material/Phone';
 import Swal from "sweetalert2";
 
 const drawerWidth = 260;
@@ -64,6 +64,11 @@ export default function AdminDrawer({ children }) {
       icon: <ShoppingBagRoundedIcon />,
       to: "/admin/vieworder",
     },
+    {
+      text : "Contects",
+      icon: <PhoneIcon/>,
+      to:"/admin/contectsreq"
+    }
   ];
 
   const handleLogout = async () => {

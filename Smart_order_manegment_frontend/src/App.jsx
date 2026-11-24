@@ -24,6 +24,7 @@ import Myorder from "./Pages/Myorder"
 import Wishlist from "./Pages/Wishlist";
 import ViewOrder from "./Admin/ViewOrder";
 import Cart from "./Pages/Cart";
+import ContectView from "./Admin/ContectView";
 export default function App() {
   return (
     <BrowserRouter>
@@ -56,6 +57,8 @@ export default function App() {
           <Route path="/admin/edit-product/:id" element={<Editproduct/>}/>
           <Route path="/admin/single/view/:id" element={<Singleview/>}/>
           <Route path="/admin/vieworder" element={<ViewOrder/>}/>
+          <Route path="/admin/contectsreq" element={<ContectView/>}/>
+          {/* /admin/contectsreq */}
         </Route>
       </Routes>
     </BrowserRouter>

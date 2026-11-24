@@ -1,32 +1,35 @@
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import Drawers1 from "../Component/Drawers1";
 
-import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
-import Card from "@mui/material/Card";
-import CardMedia from "@mui/material/CardMedia";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
-import Stack from "@mui/material/Stack";
-import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
-import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
-import Paper from "@mui/material/Paper";
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
+import CardMedia from '@mui/material/CardMedia';
+import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import Chip from '@mui/material/Chip';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import Paper from '@mui/material/Paper';
+import CircularProgress from '@mui/material/CircularProgress';
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
+import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 
 export default function Cart() {
   const [deta, setdeta] = useState([]);
   const [loading, setloading] = useState(true);
 
-  // Fetch Cart
   const FetchCart = () => {
     axios
       .get("http://localhost:5600/cart/user/cartlist", {
@@ -35,10 +38,8 @@ export default function Cart() {
         },
       })
       .then((res) => {
-        // Nested array ko normal array mein convert karo
         const products = res.data.data?.flat() || [];
 
-        // Duplicate products remove
         const uniqueProducts = [
           ...new Map(products.map((item) => [item._id, item])).values(),
         ];
@@ -49,22 +50,18 @@ export default function Cart() {
         console.log(er);
         setdeta([]);
       })
-      .finally(() => {
-        setloading(false);
-      });
+      .finally(() => setloading(false));
   };
 
   useEffect(() => {
     FetchCart();
   }, []);
 
-  // Quantity Update
   const HandleQuantity = (id, type) => {
     setdeta((prev) =>
       prev.map((item) => {
         if (item._id === id) {
           const currentQuantity = item.quantity || 1;
-
           const newQuantity =
             type === "add" ? currentQuantity + 1 : currentQuantity - 1;
 
@@ -79,33 +76,26 @@ export default function Cart() {
             return item;
           }
 
-          return {
-            ...item,
-            quantity: newQuantity,
-          };
+          return { ...item, quantity: newQuantity };
         }
-
         return item;
-      }),
+      })
     );
   };
 
-  // Delete Cart Product
   const HandleDeleteCart = (id) => {
-    console.log(id);
     Swal.fire({
       title: "Remove Product?",
       text: "Do you want to remove this product from your cart?",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
+      confirmButtonColor: "#253b80",
+      cancelButtonColor: "#94a3b8",
       confirmButtonText: "Yes, Remove",
-      cancelButtonText: "Cancel",
+      cancelButtonText: "Keep It",
+      reverseButtons: true,
     }).then((result) => {
       if (result.isConfirmed) {
-        // Delete API abhi connect nahi hai
-
         axios
           .delete(`http://localhost:5600/cart/user/removecart/${id}`, {
             headers: {
@@ -114,14 +104,11 @@ export default function Cart() {
           })
           .then((res) => {
             Swal.fire({
-              title: "Success!",
-              text:
-                res.data.message || "Product removed from cart successfully",
+              title: "Removed!",
+              text: res.data.message || "Product removed from cart.",
               icon: "success",
-              confirmButtonText: "OK",
+              confirmButtonColor: "#253b80",
             });
-
-            // Cart list refresh karne ke liye
             FetchCart();
           })
           .catch((er) => {
@@ -129,377 +116,558 @@ export default function Cart() {
               title: "Error!",
               text: er.response?.data?.message || "Something went wrong",
               icon: "error",
-              confirmButtonText: "OK",
             });
           });
       }
     });
   };
 
-  // Calculations
   const subtotal = deta.reduce(
-    (total, item) => total + item.price * (item.quantity || 1),
-    0,
+    (total, item) => total + Number(item.price || 0) * (item.quantity || 1),
+    0
   );
 
   const totalItems = deta.reduce(
     (total, item) => total + (item.quantity || 1),
-    0,
+    0
   );
+
+  const formatPrice = (price) =>
+    Number(price || 0).toLocaleString("en-IN");
+
+  const getImage = (image) => {
+    if (!image) return "";
+    return image.startsWith("http")
+      ? image
+      : `http://localhost:5600/${image.replace(/^\/+/, "")}`;
+  };
 
   return (
     <Drawers1>
       <Box
         sx={{
           minHeight: "100vh",
-          bgcolor: "#f4f6fb",
-          pt: 11,
+          bgcolor: "#f5f7fc",
+          pt: { xs: 10, md: 12 },
           px: { xs: 2, sm: 3, md: 4 },
-          pb: 5,
-          boxSizing: "border-box",
+          pb: 6,
         }}
       >
-        {/* Header */}
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          justifyContent="space-between"
-          alignItems={{ xs: "flex-start", sm: "center" }}
-          spacing={2}
-          sx={{ mb: 4 }}
-        >
-          <Stack direction="row" spacing={1.5} alignItems="center">
-            <Box
+        <Box sx={{ maxWidth: 1500, mx: "auto" }}>
+
+          {/* Header */}
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            justifyContent="space-between"
+            alignItems={{ xs: "flex-start", sm: "center" }}
+            spacing={2}
+            sx={{ mb: 4 }}
+          >
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Box
+                sx={{
+                  width: 58,
+                  height: 58,
+                  borderRadius: 3,
+                  background: "linear-gradient(135deg,#253b80,#536dce)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 8px 20px rgba(37,59,128,0.2)",
+                }}
+              >
+                <ShoppingCartOutlinedIcon
+                  sx={{ color: "#fff", fontSize: 29 }}
+                />
+              </Box>
+
+              <Box>
+                <Typography
+                  variant="h4"
+                  fontWeight={850}
+                  color="#172554"
+                  sx={{ letterSpacing: -1 }}
+                >
+                  Shopping Cart
+                </Typography>
+                <Typography color="text.secondary" fontSize={14}>
+                  Manage your selected products and checkout
+                </Typography>
+              </Box>
+            </Stack>
+
+            <Chip
+              icon={<ShoppingBagOutlinedIcon />}
+              label={`${deta.length} Products`}
               sx={{
-                width: 48,
-                height: 48,
-                bgcolor: "#e8edff",
-                borderRadius: 2.5,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                px: 1.5,
+                py: 2.5,
+                fontWeight: 750,
+                borderRadius: 2,
+                bgcolor: "#e9edff",
+                color: "#253b80",
+                "& .MuiChip-icon": { color: "#253b80" },
               }}
-            >
-              <ShoppingCartOutlinedIcon
-                sx={{ color: "#253b80", fontSize: 28 }}
-              />
-            </Box>
-
-            <Box>
-              <Typography variant="h4" fontWeight={800} color="#172554">
-                My Cart
-              </Typography>
-
-              <Typography color="text.secondary" variant="body2">
-                Review your selected products
-              </Typography>
-            </Box>
+            />
           </Stack>
 
-          <Chip
-            icon={<ShoppingBagOutlinedIcon />}
-            label={`${deta.length} Products`}
-            color="primary"
-            variant="outlined"
-            sx={{ fontWeight: 700, px: 1, py: 2.3 }}
-          />
-        </Stack>
+          {/* Loading */}
+          {loading ? (
+            <Paper
+              elevation={0}
+              sx={{
+                p: 8,
+                borderRadius: 4,
+                textAlign: "center",
+              }}
+            >
+              <CircularProgress sx={{ color: "#253b80" }} />
+              <Typography color="text.secondary" sx={{ mt: 2 }}>
+                Loading your cart...
+              </Typography>
+            </Paper>
+          ) : deta.length === 0 ? (
+            /* Empty Cart */
+            <Paper
+              elevation={0}
+              sx={{
+                py: 10,
+                px: 2,
+                borderRadius: 4,
+                textAlign: "center",
+                border: "1px solid #e8edf5",
+                bgcolor: "#fff",
+              }}
+            >
+              <Box
+                sx={{
+                  width: 110,
+                  height: 110,
+                  borderRadius: "50%",
+                  bgcolor: "#eef2ff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  mx: "auto",
+                  mb: 3,
+                }}
+              >
+                <ShoppingCartOutlinedIcon
+                  sx={{ fontSize: 55, color: "#536dce" }}
+                />
+              </Box>
 
-        <Divider sx={{ mb: 3 }} />
+              <Typography variant="h5" fontWeight={850} color="#172554">
+                Your Cart is Empty
+              </Typography>
 
-        {/* Loading */}
-        {loading ? (
-          <Box sx={{ textAlign: "center", py: 10 }}>
-            <Typography color="text.secondary">Loading your cart...</Typography>
-          </Box>
-        ) : deta.length === 0 ? (
-          /* Empty Cart */
-          <Paper
-            elevation={0}
-            sx={{
-              textAlign: "center",
-              py: 10,
-              borderRadius: 4,
-              bgcolor: "#fff",
-            }}
-          >
-            <ShoppingCartOutlinedIcon
-              sx={{ fontSize: 75, color: "#94a3b8", mb: 2 }}
-            />
+              <Typography color="text.secondary" sx={{ mt: 1 }}>
+                You haven't added any products to your cart yet.
+              </Typography>
+            </Paper>
+          ) : (
+            <Grid container spacing={3} alignItems="flex-start">
 
-            <Typography variant="h5" fontWeight={800}>
-              Your Cart is Empty
-            </Typography>
-
-            <Typography color="text.secondary" sx={{ mt: 1 }}>
-              Looks like you haven't added any products yet.
-            </Typography>
-          </Paper>
-        ) : (
-          <Grid container spacing={3}>
-            {/* Product Cards */}
-            <Grid item xs={12} md={9}>
-              <Grid container spacing={3}>
-                {deta.map((item, index) => (
-                  <Grid item xs={12} sm={6} md={4} key={`${item._id}-${index}`}>
+              {/* Product List */}
+              <Grid size={{ xs: 12, lg: 8.5 }}>
+                <Stack spacing={2.5}>
+                  {deta.map((item) => (
                     <Card
+                      key={item._id}
                       elevation={0}
                       sx={{
-                        height: "100%",
-                        borderRadius: 3,
-                        border: "1px solid #e8edf4",
+                        borderRadius: 3.5,
+                        border: "1px solid #e7ebf3",
                         overflow: "hidden",
-                        display: "flex",
-                        flexDirection: "column",
-                        transition: "0.3s",
+                        transition: "0.25s",
                         "&:hover": {
-                          transform: "translateY(-6px)",
-                          boxShadow: "0 10px 25px rgba(0,0,0,0.10)",
+                          borderColor: "#c5d0f3",
+                          boxShadow: "0 10px 30px rgba(37,59,128,0.07)",
                         },
                       }}
                     >
-                      {/* Image */}
                       <Box
                         sx={{
-                          position: "relative",
-                          bgcolor: "#f8f9fc",
-                          p: 2,
+                          p: { xs: 2, sm: 2.5 },
+                          display: "flex",
+                          flexDirection: { xs: "column", sm: "row" },
+                          gap: 3,
                         }}
                       >
-                        <CardMedia
-                          component="img"
-                          image={
-                            item.productImage?.startsWith("http")
-                              ? item.productImage
-                              : `http://localhost:5600/${item.productImage?.replace(/^\/+/, "")}`
-                          }
-                          alt={item.productName}
+                        {/* Product Image */}
+                        <Box
                           sx={{
-                            height: 200,
-                            objectFit: "contain",
+                            width: { xs: "100%", sm: 180 },
+                            height: { xs: 190, sm: 170 },
+                            flexShrink: 0,
+                            bgcolor: "#f7f8fc",
+                            borderRadius: 3,
+                            position: "relative",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            p: 1.5,
                           }}
-                        />
-
-                        <Chip
-                          label={item.stock > 0 ? "In Stock" : "Out of Stock"}
-                          color={item.stock > 0 ? "success" : "error"}
-                          size="small"
-                          sx={{
-                            position: "absolute",
-                            top: 12,
-                            right: 12,
-                            fontWeight: 700,
-                          }}
-                        />
-                      </Box>
-
-                      {/* Details */}
-                      <CardContent sx={{ flexGrow: 1, p: 2.5 }}>
-                        <Typography
-                          variant="h6"
-                          fontWeight={750}
-                          color="#1e293b"
-                          noWrap
                         >
-                          {item.productName}
-                        </Typography>
+                          <CardMedia
+                            component="img"
+                            image={getImage(item.productImage)}
+                            alt={item.productName}
+                            sx={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "contain",
+                            }}
+                          />
 
-                        <Typography variant="caption" color="text.secondary">
-                          SKU: {item.sku}
-                        </Typography>
-
-                        <Typography
-                          variant="h5"
-                          fontWeight={800}
-                          color="primary.main"
-                          sx={{ mt: 2 }}
-                        >
-                          ₹{item.price?.toLocaleString("en-IN")}
-                        </Typography>
-
-                        <Divider sx={{ my: 2 }} />
-
-                        {/* Quantity */}
-                        <Typography fontWeight={600} variant="body2">
-                          Quantity
-                        </Typography>
-
-                        <Stack
-                          direction="row"
-                          alignItems="center"
-                          spacing={1.5}
-                          sx={{ mt: 1 }}
-                        >
-                          <IconButton
+                          <Chip
                             size="small"
-                            disabled={(item.quantity || 1) <= 1}
-                            onClick={() => HandleQuantity(item._id, "remove")}
-                            sx={{ border: "1px solid #ddd" }}
-                          >
-                            <RemoveIcon fontSize="small" />
-                          </IconButton>
+                            label={
+                              item.stock > 0 ? "In Stock" : "Out of Stock"
+                            }
+                            color={item.stock > 0 ? "success" : "error"}
+                            sx={{
+                              position: "absolute",
+                              top: 10,
+                              left: 10,
+                              fontWeight: 750,
+                              fontSize: 10,
+                            }}
+                          />
+                        </Box>
 
-                          <Typography fontWeight={700}>
-                            {item.quantity || 1}
-                          </Typography>
-
-                          <IconButton
-                            size="small"
-                            disabled={(item.quantity || 1) >= item.stock}
-                            onClick={() => HandleQuantity(item._id, "add")}
-                            sx={{ border: "1px solid #ddd" }}
-                          >
-                            <AddIcon fontSize="small" />
-                          </IconButton>
-                        </Stack>
-
-                        <Divider sx={{ my: 2 }} />
-
-                        {/* Total */}
-                        <Stack
-                          direction="row"
-                          justifyContent="space-between"
-                          alignItems="center"
-                        >
-                          <Typography color="text.secondary" fontWeight={600}>
-                            Total Price
-                          </Typography>
-
-                          <Typography variant="h6" fontWeight={800}>
-                            ₹
-                            {(item.price * (item.quantity || 1)).toLocaleString(
-                              "en-IN",
-                            )}
-                          </Typography>
-                        </Stack>
-                      </CardContent>
-
-                      {/* Remove */}
-                      <Box sx={{ px: 2.5, pb: 2.5 }}>
-                        <Button
-                          fullWidth
-                          variant="outlined"
-                          color="error"
-                          startIcon={<DeleteOutlineOutlinedIcon />}
-                          onClick={() => HandleDeleteCart(item._id)}
+                        {/* Product Details */}
+                        <Box
                           sx={{
-                            borderRadius: 2,
-                            textTransform: "none",
-                            fontWeight: 700,
+                            flex: 1,
+                            minWidth: 0,
+                            display: "flex",
+                            flexDirection: "column",
                           }}
                         >
-                          Remove
-                        </Button>
+                          <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            alignItems="flex-start"
+                            spacing={1}
+                          >
+                            <Box sx={{ minWidth: 0 }}>
+                              <Typography
+                                variant="h6"
+                                fontWeight={800}
+                                color="#172554"
+                                sx={{ wordBreak: "break-word" }}
+                              >
+                                {item.productName}
+                              </Typography>
+
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                SKU: {item.sku || "N/A"}
+                              </Typography>
+                            </Box>
+
+                            <IconButton
+                              onClick={() => HandleDeleteCart(item._id)}
+                              sx={{
+                                bgcolor: "#fff1f2",
+                                color: "#e11d48",
+                                borderRadius: 2,
+                                "&:hover": { bgcolor: "#ffe4e6" },
+                              }}
+                            >
+                              <DeleteOutlineOutlinedIcon />
+                            </IconButton>
+                          </Stack>
+
+                          <Typography
+                            variant="h5"
+                            fontWeight={850}
+                            color="#253b80"
+                            sx={{ mt: 1.5 }}
+                          >
+                            ₹{formatPrice(item.price)}
+                          </Typography>
+
+                          <Divider sx={{ my: 2 }} />
+
+                          <Stack
+                            direction={{ xs: "column", sm: "row" }}
+                            justifyContent="space-between"
+                            alignItems={{ xs: "flex-start", sm: "center" }}
+                            spacing={2}
+                            sx={{ mt: "auto" }}
+                          >
+                            {/* Quantity */}
+                            <Box>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                fontWeight={700}
+                              >
+                                QUANTITY
+                              </Typography>
+
+                              <Stack
+                                direction="row"
+                                alignItems="center"
+                                spacing={1.5}
+                                sx={{ mt: 0.7 }}
+                              >
+                                <IconButton
+                                  size="small"
+                                  disabled={(item.quantity || 1) <= 1}
+                                  onClick={() =>
+                                    HandleQuantity(item._id, "remove")
+                                  }
+                                  sx={{
+                                    border: "1px solid #dce2ee",
+                                    borderRadius: 2,
+                                    width: 34,
+                                    height: 34,
+                                    color: "#253b80",
+                                  }}
+                                >
+                                  <RemoveIcon fontSize="small" />
+                                </IconButton>
+
+                                <Typography
+                                  fontWeight={800}
+                                  sx={{ minWidth: 20, textAlign: "center" }}
+                                >
+                                  {item.quantity || 1}
+                                </Typography>
+
+                                <IconButton
+                                  size="small"
+                                  disabled={
+                                    (item.quantity || 1) >= item.stock ||
+                                    item.stock <= 0
+                                  }
+                                  onClick={() =>
+                                    HandleQuantity(item._id, "add")
+                                  }
+                                  sx={{
+                                    border: "1px solid #dce2ee",
+                                    borderRadius: 2,
+                                    width: 34,
+                                    height: 34,
+                                    color: "#253b80",
+                                  }}
+                                >
+                                  <AddIcon fontSize="small" />
+                                </IconButton>
+                              </Stack>
+                            </Box>
+
+                            {/* Item Total */}
+                            <Box sx={{ textAlign: { sm: "right" } }}>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                fontWeight={700}
+                              >
+                                ITEM TOTAL
+                              </Typography>
+                              <Typography
+                                variant="h6"
+                                fontWeight={850}
+                                color="#172554"
+                              >
+                                ₹
+                                {formatPrice(
+                                  Number(item.price || 0) *
+                                    (item.quantity || 1)
+                                )}
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        </Box>
                       </Box>
                     </Card>
-                  </Grid>
-                ))}
+                  ))}
+                </Stack>
               </Grid>
-            </Grid>
 
-            {/* Order Summary */}
-            <Grid item xs={12} md={3}>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 3,
-                  borderRadius: 3,
-                  border: "1px solid #e8edf4",
-                  position: { md: "sticky" },
-                  top: 100,
-                }}
-              >
-                <Typography variant="h6" fontWeight={800}>
-                  Order Summary
-                </Typography>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  sx={{ mb: 2 }}
-                >
-                  <Typography color="text.secondary">Total Items</Typography>
-
-                  <Typography fontWeight={600}>{totalItems}</Typography>
-                </Stack>
-
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  sx={{ mb: 2 }}
-                >
-                  <Typography color="text.secondary">Subtotal</Typography>
-
-                  <Typography fontWeight={600}>
-                    ₹{subtotal.toLocaleString("en-IN")}
-                  </Typography>
-                </Stack>
-
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  sx={{ mb: 2 }}
-                >
-                  <Typography color="text.secondary">Shipping</Typography>
-
-                  <Typography color="success.main" fontWeight={700}>
-                    Free
-                  </Typography>
-                </Stack>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Typography variant="h6" fontWeight={800}>
-                    Grand Total
-                  </Typography>
-
-                  <Typography
-                    variant="h5"
-                    color="primary.main"
-                    fontWeight={800}
-                  >
-                    ₹{subtotal.toLocaleString("en-IN")}
-                  </Typography>
-                </Stack>
-
-                <Button
-                  fullWidth
-                  variant="contained"
-                  endIcon={<ArrowForwardIcon />}
+              {/* Order Summary */}
+              <Grid size={{ xs: 12, lg: 3.5 }}>
+                <Paper
+                  elevation={0}
                   sx={{
-                    mt: 3,
-                    py: 1.5,
-                    borderRadius: 2,
-                    textTransform: "none",
-                    fontWeight: 700,
-                    bgcolor: "#253b80",
-                    "&:hover": {
-                      bgcolor: "#192c65",
-                    },
+                    p: 3,
+                    borderRadius: 3.5,
+                    border: "1px solid #e7ebf3",
+                    bgcolor: "#fff",
+                    position: { lg: "sticky" },
+                    top: 100,
                   }}
                 >
-                  Proceed to Checkout
-                </Button>
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    spacing={1.5}
+                  >
+                    <Box
+                      sx={{
+                        width: 42,
+                        height: 42,
+                        borderRadius: 2,
+                        bgcolor: "#eef2ff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <Inventory2OutlinedIcon sx={{ color: "#253b80" }} />
+                    </Box>
 
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  display="block"
-                  textAlign="center"
-                  sx={{ mt: 2 }}
-                >
-                  Secure checkout experience
-                </Typography>
-              </Paper>
+                    <Typography
+                      variant="h6"
+                      fontWeight={850}
+                      color="#172554"
+                    >
+                      Order Summary
+                    </Typography>
+                  </Stack>
+
+                  <Divider sx={{ my: 2.5 }} />
+
+                  <Stack spacing={2}>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                    >
+                      <Typography color="text.secondary">
+                        Total Products
+                      </Typography>
+                      <Typography fontWeight={750}>{deta.length}</Typography>
+                    </Stack>
+
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                    >
+                      <Typography color="text.secondary">
+                        Total Quantity
+                      </Typography>
+                      <Typography fontWeight={750}>{totalItems}</Typography>
+                    </Stack>
+
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                    >
+                      <Typography color="text.secondary">
+                        Subtotal
+                      </Typography>
+                      <Typography fontWeight={750}>
+                        ₹{formatPrice(subtotal)}
+                      </Typography>
+                    </Stack>
+
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                    >
+                      <Typography color="text.secondary">
+                        Shipping
+                      </Typography>
+                      <Typography
+                        color="success.main"
+                        fontWeight={750}
+                      >
+                        Free
+                      </Typography>
+                    </Stack>
+                  </Stack>
+
+                  <Divider sx={{ my: 2.5 }} />
+
+                  <Stack
+                    direction="row"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    <Typography fontWeight={800} color="#172554">
+                      Grand Total
+                    </Typography>
+
+                    <Typography
+                      variant="h5"
+                      fontWeight={900}
+                      color="#253b80"
+                    >
+                      ₹{formatPrice(subtotal)}
+                    </Typography>
+                  </Stack>
+
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    endIcon={<ArrowForwardIcon />}
+                    sx={{
+                      mt: 3,
+                      py: 1.6,
+                      borderRadius: 2.5,
+                      textTransform: "none",
+                      fontWeight: 800,
+                      fontSize: 15,
+                      background:
+                        "linear-gradient(135deg,#253b80,#536dce)",
+                      boxShadow: "0 7px 18px rgba(37,59,128,0.2)",
+                      "&:hover": {
+                        background:
+                          "linear-gradient(135deg,#192c65,#4059b4)",
+                        boxShadow: "0 9px 22px rgba(37,59,128,0.28)",
+                      },
+                    }}
+                  >
+                    Proceed to Checkout
+                  </Button>
+
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    spacing={1}
+                    justifyContent="center"
+                    sx={{ mt: 2.5 }}
+                  >
+                    <SecurityOutlinedIcon
+                      sx={{ fontSize: 17, color: "#16a34a" }}
+                    />
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                    >
+                      Secure checkout experience
+                    </Typography>
+                  </Stack>
+
+                  <Divider sx={{ my: 2.5 }} />
+
+                  <Stack direction="row" spacing={1.5} alignItems="center">
+                    <LocalShippingOutlinedIcon
+                      sx={{ color: "#536dce", fontSize: 25 }}
+                    />
+                    <Box>
+                      <Typography fontWeight={750} fontSize={13}>
+                        Free Shipping
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                      >
+                        No extra delivery charges
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Paper>
+              </Grid>
             </Grid>
-          </Grid>
-        )}
+          )}
+        </Box>
       </Box>
     </Drawers1>
   );

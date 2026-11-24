@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from "react";
 import Drawers1 from "../Component/Drawers1";
 import axios from "axios";
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -11,13 +13,12 @@ import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import Chip from "@mui/material/Chip";
 import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import CircularProgress from "@mui/material/CircularProgress";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
+import Grid from "@mui/material/Grid";
 
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import CachedIcon from "@mui/icons-material/Cached";
@@ -29,13 +30,12 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-
-import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
+import PendingActionsIcon from "@mui/icons-material/PendingActions";
+import DoneAllIcon from "@mui/icons-material/DoneAll";
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 
 const API_BASE_URL = "http://localhost:5600";
 
-// Image URL Function
 const getImageUrl = (image) => {
   if (!image) return "";
 
@@ -68,7 +68,6 @@ export default function Myorder() {
 
   const navigate = useNavigate();
 
-  // Fetch Orders
   const getOrders = async () => {
     setLoading(true);
 
@@ -79,10 +78,16 @@ export default function Myorder() {
         },
       });
 
-      console.log("Order Data:", res.data.deta);
       setorder(res.data.deta || []);
     } catch (error) {
       console.log("Order Fetch Error:", error);
+
+      Swal.fire({
+        title: "Unable to Load Orders",
+        text: error.response?.data?.message || "Please try again.",
+        icon: "error",
+        confirmButtonColor: "#4f46e5",
+      });
     } finally {
       setLoading(false);
     }
@@ -92,7 +97,26 @@ export default function Myorder() {
     getOrders();
   }, []);
 
-  // Get Current Status Index
+  // ORDER COUNTS
+
+  const totalOrders = order.length;
+
+  const pendingOrders = order.filter((item) =>
+    ["pending", "confirmed", "processing", "shipped", "out for delivery"].includes(
+      item.orderStatus?.toLowerCase()
+    )
+  ).length;
+
+  const deliveredOrders = order.filter(
+    (item) => item.orderStatus?.toLowerCase() === "delivered"
+  ).length;
+
+  const cancelledOrders = order.filter(
+    (item) => item.orderStatus?.toLowerCase() === "cancelled"
+  ).length;
+
+  // STATUS INDEX
+
   const getStatusIndex = (status) => {
     const value = status?.toLowerCase();
 
@@ -105,20 +129,20 @@ export default function Myorder() {
     return -1;
   };
 
-  // Get History for Each Step
   const getStepHistory = (item, step) => {
     return item.statusHistory?.find(
       (history) => history.status?.toLowerCase() === step.toLowerCase()
     );
   };
 
-  // Status Colors
+  // STATUS COLORS
+
   const getStatusStyle = (status) => {
     const value = status?.toLowerCase();
 
     if (value === "cancelled") {
       return {
-        bgcolor: "#fee2e2",
+        bgcolor: "#fff1f2",
         color: "#dc2626",
         border: "#fecaca",
       };
@@ -126,32 +150,33 @@ export default function Myorder() {
 
     if (value === "delivered") {
       return {
-        bgcolor: "#dcfce7",
-        color: "#15803d",
-        border: "#bbf7d0",
+        bgcolor: "#ecfdf5",
+        color: "#059669",
+        border: "#a7f3d0",
       };
     }
 
     return {
       bgcolor: "#eef2ff",
-      color: "#4338ca",
+      color: "#4f46e5",
       border: "#c7d2fe",
     };
   };
 
-  // Cancel Order Request
+  // CANCEL ORDER
+
   const handlcancelrequest = async (id) => {
     const result = await Swal.fire({
-      title: "Cancel Order",
-      text: "Please enter the reason for cancelling your order.",
+      title: "Cancel Order?",
+      text: "Please provide a reason for cancelling your order.",
       input: "textarea",
       inputPlaceholder: "Enter your cancellation reason...",
       inputAttributes: {
         "aria-label": "Cancellation reason",
       },
       showCancelButton: true,
-      confirmButtonText: "Cancel Order",
-      cancelButtonText: "Close",
+      confirmButtonText: "Submit Request",
+      cancelButtonText: "Go Back",
       confirmButtonColor: "#dc2626",
 
       inputValidator: (value) => {
@@ -163,13 +188,11 @@ export default function Myorder() {
 
     if (!result.isConfirmed) return;
 
-    const reason = result.value.trim();
-
     try {
       const res = await axios.post(
         `${API_BASE_URL}/order/user/cancelrequest/${id}`,
         {
-          reason: reason,
+          reason: result.value.trim(),
         },
         {
           headers: {
@@ -178,27 +201,26 @@ export default function Myorder() {
         }
       );
 
-      Swal.fire({
-        title: "Cancellation Request Submitted!",
-        text: res.data.message,
+      await Swal.fire({
+        title: "Request Submitted!",
+        text: res.data.message || "Cancellation request submitted successfully.",
         icon: "success",
         confirmButtonColor: "#4f46e5",
       });
 
       getOrders();
-    } catch (er) {
-      console.log(er);
-
+    } catch (error) {
       Swal.fire({
-        title: "Error!",
-        text: er.response?.data?.message || "Something went wrong!",
+        title: "Request Failed",
+        text: error.response?.data?.message || "Something went wrong!",
         icon: "error",
         confirmButtonColor: "#4f46e5",
       });
     }
   };
 
-  // Tracking Timeline
+  // TRACKING TIMELINE
+
   const TrackingTimeline = ({ item, compact = false }) => {
     const activeStep = getStatusIndex(item.orderStatus);
 
@@ -214,14 +236,14 @@ export default function Myorder() {
         >
           <Stack direction="row" spacing={1} alignItems="center" mb={1}>
             <CancelOutlinedIcon sx={{ color: "#dc2626" }} />
+
             <Typography fontWeight={800} color="#dc2626">
               Order Cancelled
             </Typography>
           </Stack>
 
           <Typography fontSize={13} color="#991b1b">
-            {item.cancellation?.reason ||
-              "This order has been cancelled."}
+            {item.cancellation?.reason || "This order has been cancelled."}
           </Typography>
         </Box>
       );
@@ -240,11 +262,10 @@ export default function Myorder() {
               sx={{
                 display: "flex",
                 gap: 2,
-                minHeight: compact ? 57 : 68,
+                minHeight: compact ? 58 : 70,
                 position: "relative",
               }}
             >
-              {/* Timeline Circle */}
               <Box
                 sx={{
                   width: 31,
@@ -266,14 +287,13 @@ export default function Myorder() {
                 {completed && <CheckCircleIcon sx={{ fontSize: 19 }} />}
               </Box>
 
-              {/* Timeline Line */}
               {index !== trackingSteps.length - 1 && (
                 <Box
                   sx={{
                     position: "absolute",
                     left: 14,
                     top: 31,
-                    height: compact ? 26 : 37,
+                    height: compact ? 27 : 39,
                     width: 2,
                     bgcolor:
                       completed && index < activeStep
@@ -283,12 +303,11 @@ export default function Myorder() {
                 />
               )}
 
-              {/* Step Details */}
               <Box sx={{ pb: 2 }}>
                 <Typography
                   fontSize={13}
                   fontWeight={current ? 800 : 600}
-                  color={completed ? "#172033" : "#94a3b8"}
+                  color={completed ? "#172554" : "#94a3b8"}
                 >
                   {step}
                 </Typography>
@@ -298,7 +317,7 @@ export default function Myorder() {
                     variant="caption"
                     display="block"
                     color="#94a3b8"
-                    sx={{ mt: 0.3 }}
+                    mt={0.3}
                   >
                     {new Date(history.updatedAt).toLocaleString("en-IN")}
                   </Typography>
@@ -326,42 +345,89 @@ export default function Myorder() {
     );
   };
 
-  const handleCloseTracking = () => {
-    setSelectedOrder(null);
-  };
+  // SUMMARY CARD
+
+  const SummaryCard = ({ title, count, icon, color, bg }) => (
+    <Paper
+      elevation={0}
+      sx={{
+        p: 2.5,
+        borderRadius: 3,
+        border: "1px solid #e8edf5",
+        height: "100%",
+        transition: "all .25s ease",
+        "&:hover": {
+          transform: "translateY(-4px)",
+          boxShadow: "0 10px 25px rgba(15,23,42,0.06)",
+        },
+      }}
+    >
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Box>
+          <Typography color="#94a3b8" fontSize={12} fontWeight={700}>
+            {title}
+          </Typography>
+
+          <Typography
+            variant="h4"
+            fontWeight={800}
+            color="#172554"
+            mt={1}
+          >
+            {count}
+          </Typography>
+        </Box>
+
+        <Avatar
+          sx={{
+            width: 48,
+            height: 48,
+            bgcolor: bg,
+            color: color,
+            borderRadius: 2.5,
+          }}
+        >
+          {icon}
+        </Avatar>
+      </Stack>
+    </Paper>
+  );
 
   return (
     <Drawers1>
       <Box
         sx={{
+          minHeight: "100vh",
           width: "100%",
           maxWidth: 1500,
           mx: "auto",
+          bgcolor: "#f5f7fc",
+          px: { xs: 2, sm: 3, md: 4 },
+          py: 3,
+          pt: { xs: 8, md: 9 },
         }}
       >
-        {/* Page Header */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: { xs: "flex-start", sm: "center" },
-            flexWrap: "wrap",
-            gap: 2,
-            mb: 3.5,
-          }}
+        {/* HEADER */}
+
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          justifyContent="space-between"
+          alignItems={{ xs: "flex-start", sm: "center" }}
+          spacing={2}
+          mb={3}
         >
           <Box>
             <Typography
-              variant="h5"
+              variant="h4"
               fontWeight={800}
-              color="#172033"
-              mb={0.7}
+              color="#172554"
+              sx={{ fontSize: { xs: 26, md: 32 } }}
             >
               My Orders
             </Typography>
 
-            <Typography fontSize={14} color="#8490a5">
-              Track and manage all your purchases in one place.
+            <Typography color="#8490a5" fontSize={14} mt={0.7}>
+              Manage your purchases and track your deliveries.
             </Typography>
           </Box>
 
@@ -393,65 +459,151 @@ export default function Myorder() {
           >
             {loading ? "Refreshing..." : "Refresh Orders"}
           </Button>
-        </Box>
+        </Stack>
 
-        {/* Summary Banner */}
+        {/* HERO BANNER */}
+
         <Paper
           elevation={0}
           sx={{
-            p: { xs: 2.5, md: 3 },
-            mb: 3.5,
-            borderRadius: 3.5,
+            p: { xs: 2.5, md: 3.5 },
+            mb: 3,
+            borderRadius: 4,
             color: "#fff",
             background:
-              "linear-gradient(110deg, #1e1b4b 0%, #3730a3 60%, #6366f1 100%)",
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
+              "linear-gradient(115deg, #1e1b4b 0%, #3730a3 55%, #6366f1 100%)",
+            position: "relative",
+            overflow: "hidden",
           }}
         >
-          <Avatar
-            sx={{
-              width: 54,
-              height: 54,
-              bgcolor: "rgba(255,255,255,0.15)",
-              color: "#fff",
-              borderRadius: 2.5,
-            }}
-          >
-            <ShoppingBagOutlinedIcon fontSize="large" />
-          </Avatar>
-
-          <Box>
-            <Typography fontSize={20} fontWeight={800}>
-              Your Shopping Activity
-            </Typography>
-
-            <Typography fontSize={13} color="#e0e7ff">
-              You have {order.length} order{order.length !== 1 ? "s" : ""} in
-              your account.
-            </Typography>
-          </Box>
-
-          <Box sx={{ flexGrow: 1 }} />
-
           <Box
             sx={{
-              display: { xs: "none", sm: "flex" },
-              alignItems: "center",
-              gap: 1,
-              bgcolor: "rgba(255,255,255,0.13)",
-              px: 2,
-              py: 1,
-              borderRadius: 2,
+              position: "absolute",
+              width: 220,
+              height: 220,
+              borderRadius: "50%",
+              bgcolor: "rgba(255,255,255,0.06)",
+              right: -60,
+              top: -100,
             }}
+          />
+
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={2}
+            position="relative"
           >
-            <Inventory2OutlinedIcon />
-            <Typography fontWeight={800}>{order.length}</Typography>
-          </Box>
+            <Avatar
+              sx={{
+                width: 58,
+                height: 58,
+                bgcolor: "rgba(255,255,255,0.15)",
+                color: "#fff",
+                borderRadius: 3,
+              }}
+            >
+              <ShoppingBagOutlinedIcon fontSize="large" />
+            </Avatar>
+
+            <Box>
+              <Typography
+                fontSize={{ xs: 19, md: 23 }}
+                fontWeight={800}
+              >
+                Your Shopping Dashboard
+              </Typography>
+
+              <Typography
+                fontSize={13}
+                color="#e0e7ff"
+                mt={0.5}
+              >
+                All your orders, delivery updates and purchase details in one place.
+              </Typography>
+            </Box>
+          </Stack>
+
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems="center"
+            mt={3}
+            position="relative"
+          >
+            <Inventory2OutlinedIcon sx={{ fontSize: 18 }} />
+
+            <Typography fontSize={13} fontWeight={700}>
+              {totalOrders} Total Orders
+            </Typography>
+          </Stack>
         </Paper>
 
-        {/* Loading */}
+        {/* SUMMARY CARDS */}
+
+        <Grid container spacing={2.5} mb={4}>
+          <Grid size={{ xs: 6, sm: 6, md: 3 }}>
+            <SummaryCard
+              title="Total Orders"
+              count={totalOrders}
+              icon={<ShoppingBagOutlinedIcon />}
+              color="#4f46e5"
+              bg="#eef2ff"
+            />
+          </Grid>
+
+          <Grid size={{ xs: 6, sm: 6, md: 3 }}>
+            <SummaryCard
+              title="In Progress"
+              count={pendingOrders}
+              icon={<PendingActionsIcon />}
+              color="#d97706"
+              bg="#fffbeb"
+            />
+          </Grid>
+
+          <Grid size={{ xs: 6, sm: 6, md: 3 }}>
+            <SummaryCard
+              title="Delivered"
+              count={deliveredOrders}
+              icon={<DoneAllIcon />}
+              color="#059669"
+              bg="#ecfdf5"
+            />
+          </Grid>
+
+          <Grid size={{ xs: 6, sm: 6, md: 3 }}>
+            <SummaryCard
+              title="Cancelled"
+              count={cancelledOrders}
+              icon={<CancelOutlinedIcon />}
+              color="#dc2626"
+              bg="#fff1f2"
+            />
+          </Grid>
+        </Grid>
+
+        {/* SECTION TITLE */}
+
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={2.5}
+        >
+          <Box>
+            <Typography variant="h5" fontWeight={800} color="#172554">
+              Recent Orders
+            </Typography>
+
+            <Typography color="#94a3b8" fontSize={13} mt={0.5}>
+              View your order details and delivery status.
+            </Typography>
+          </Box>
+        </Stack>
+
+        {/* LOADING */}
+
         {loading && order.length === 0 && (
           <Paper
             elevation={0}
@@ -463,21 +615,23 @@ export default function Myorder() {
             }}
           >
             <CircularProgress sx={{ color: "#4f46e5" }} />
+
             <Typography color="#8490a5" mt={2} fontSize={14}>
               Loading your orders...
             </Typography>
           </Paper>
         )}
 
-        {/* No Orders */}
+        {/* EMPTY STATE */}
+
         {!loading && order.length === 0 && (
           <Paper
             elevation={0}
             sx={{
               p: { xs: 3, md: 6 },
               textAlign: "center",
-              borderRadius: 3.5,
-              border: "1px solid #e9edf5",
+              borderRadius: 4,
+              border: "1px solid #e5eaf2",
             }}
           >
             <Avatar
@@ -493,13 +647,12 @@ export default function Myorder() {
               <ShoppingBagOutlinedIcon sx={{ fontSize: 42 }} />
             </Avatar>
 
-            <Typography variant="h5" fontWeight={800} color="#172033">
-              No Orders Found
+            <Typography variant="h5" fontWeight={800} color="#172554">
+              No Orders Yet
             </Typography>
 
             <Typography color="#94a3b8" fontSize={14} mt={1} mb={3}>
-              You have not placed any orders yet. Explore products to get
-              started.
+              Your orders will appear here after you complete your first purchase.
             </Typography>
 
             <Button
@@ -521,13 +674,16 @@ export default function Myorder() {
           </Paper>
         )}
 
-        {/* Orders List */}
+        {/* ORDER CARDS */}
+
         <Stack spacing={3}>
           {order.map((item) => {
             const status = item.orderStatus || "Pending";
             const statusStyle = getStatusStyle(status);
             const isCancelled = status.toLowerCase() === "cancelled";
             const isDelivered = status.toLowerCase() === "delivered";
+            const cancellationRequested =
+              item.cancellation?.requested;
 
             return (
               <Paper
@@ -545,7 +701,8 @@ export default function Myorder() {
                   },
                 }}
               >
-                {/* Order Header */}
+                {/* ORDER HEADER */}
+
                 <Box
                   sx={{
                     p: { xs: 2, md: 2.5 },
@@ -561,10 +718,10 @@ export default function Myorder() {
                   >
                     <Box sx={{ minWidth: 0 }}>
                       <Typography
-                        fontSize={11}
-                        fontWeight={700}
+                        fontSize={10}
+                        fontWeight={800}
                         color="#94a3b8"
-                        mb={0.5}
+                        letterSpacing={1}
                       >
                         ORDER NUMBER
                       </Typography>
@@ -573,9 +730,10 @@ export default function Myorder() {
                         fontWeight={800}
                         color="#172033"
                         fontSize={15}
+                        mt={0.5}
                         sx={{ overflowWrap: "anywhere" }}
                       >
-                        #{item.orderNumber}
+                        #{item.orderNumber || item._id}
                       </Typography>
                     </Box>
 
@@ -627,7 +785,7 @@ export default function Myorder() {
                     >
                       <Typography
                         fontSize={10}
-                        fontWeight={700}
+                        fontWeight={800}
                         color="#818cf8"
                       >
                         TOTAL AMOUNT
@@ -638,7 +796,7 @@ export default function Myorder() {
                         fontWeight={800}
                         color="#4338ca"
                       >
-                        ₹{item.grandTotal}
+                        ₹{Number(item.grandTotal || 0).toLocaleString("en-IN")}
                       </Typography>
                     </Box>
 
@@ -666,7 +824,8 @@ export default function Myorder() {
                   </Stack>
                 </Box>
 
-                {/* Order Body */}
+                {/* ORDER BODY */}
+
                 <Box
                   sx={{
                     display: "grid",
@@ -678,7 +837,8 @@ export default function Myorder() {
                     p: { xs: 2, md: 3 },
                   }}
                 >
-                  {/* Product Details */}
+                  {/* PRODUCT DETAILS */}
+
                   <Box>
                     <Typography
                       fontWeight={800}
@@ -691,7 +851,7 @@ export default function Myorder() {
 
                     {item.products?.length > 0 ? (
                       item.products.map((p, index) => {
-                        const quantity = p.quantity || 1;
+                        const quantity = Number(p.quantity || 1);
                         const imageUrl = getImageUrl(p.image);
 
                         return (
@@ -705,7 +865,6 @@ export default function Myorder() {
                                 flexWrap: "wrap",
                               }}
                             >
-                              {/* Product Image */}
                               <Box
                                 sx={{
                                   width: { xs: 95, sm: 125 },
@@ -742,14 +901,13 @@ export default function Myorder() {
                                 )}
                               </Box>
 
-                              {/* Product Info */}
                               <Box sx={{ flex: 1, minWidth: 150 }}>
                                 <Typography
                                   fontWeight={800}
                                   color="#172033"
                                   fontSize={15}
                                 >
-                                  {p.name}
+                                  {p.name || "Product"}
                                 </Typography>
 
                                 <Typography
@@ -766,7 +924,10 @@ export default function Myorder() {
                                   color="#4338ca"
                                   mt={1}
                                 >
-                                  ₹{p.total ?? p.price * quantity}
+                                  ₹
+                                  {Number(
+                                    p.total ?? p.price * quantity ?? 0
+                                  ).toLocaleString("en-IN")}
                                 </Typography>
                               </Box>
                             </Box>
@@ -783,11 +944,43 @@ export default function Myorder() {
                       </Typography>
                     )}
 
-                    {/* Order Actions */}
+                    {/* CANCELLATION REQUEST INFO */}
+
+                    {cancellationRequested && !isCancelled && (
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 1.8,
+                          mt: 2,
+                          borderRadius: 2,
+                          bgcolor: "#fffbeb",
+                          border: "1px solid #fde68a",
+                        }}
+                      >
+                        <Typography
+                          color="#92400e"
+                          fontSize={13}
+                          fontWeight={800}
+                        >
+                          Cancellation Request Submitted
+                        </Typography>
+
+                        <Typography
+                          color="#a16207"
+                          fontSize={12}
+                          mt={0.5}
+                        >
+                          Your cancellation request is awaiting processing.
+                        </Typography>
+                      </Paper>
+                    )}
+
+                    {/* ACTIONS */}
+
                     <Stack
                       direction={{ xs: "column", sm: "row" }}
                       spacing={1.5}
-                      sx={{ mt: 2 }}
+                      sx={{ mt: 2.5 }}
                     >
                       <Button
                         variant="contained"
@@ -813,7 +1006,7 @@ export default function Myorder() {
                         disabled={
                           isCancelled ||
                           isDelivered ||
-                          item.cancellation?.requested
+                          cancellationRequested
                         }
                         onClick={() => handlcancelrequest(item._id)}
                         sx={{
@@ -828,14 +1021,15 @@ export default function Myorder() {
                           },
                         }}
                       >
-                        {item.cancellation?.requested
+                        {cancellationRequested
                           ? "Cancellation Requested"
                           : "Cancel Order"}
                       </Button>
                     </Stack>
                   </Box>
 
-                  {/* Tracking Panel */}
+                  {/* TRACKING PANEL */}
+
                   <Box
                     sx={{
                       bgcolor: "#f8faff",
@@ -886,10 +1080,11 @@ export default function Myorder() {
           })}
         </Stack>
 
-        {/* Tracking Dialog */}
+        {/* TRACKING DIALOG */}
+
         <Dialog
           open={Boolean(selectedOrder)}
-          onClose={handleCloseTracking}
+          onClose={() => setSelectedOrder(null)}
           fullWidth
           maxWidth="sm"
           PaperProps={{
@@ -905,8 +1100,7 @@ export default function Myorder() {
                 sx={{
                   p: 2.5,
                   color: "#fff",
-                  background:
-                    "linear-gradient(110deg, #1e1b4b, #4f46e5)",
+                  background: "linear-gradient(110deg, #1e1b4b, #4f46e5)",
                   display: "flex",
                   alignItems: "center",
                   gap: 1.5,
@@ -927,12 +1121,12 @@ export default function Myorder() {
                   </Typography>
 
                   <Typography fontSize={12} color="#e0e7ff">
-                    #{selectedOrder.orderNumber}
+                    #{selectedOrder.orderNumber || selectedOrder._id}
                   </Typography>
                 </Box>
 
                 <IconButton
-                  onClick={handleCloseTracking}
+                  onClick={() => setSelectedOrder(null)}
                   sx={{ color: "#fff" }}
                 >
                   <CloseIcon />
@@ -982,7 +1176,7 @@ export default function Myorder() {
               <DialogActions sx={{ p: 2.5, pt: 0 }}>
                 <Button
                   variant="contained"
-                  onClick={handleCloseTracking}
+                  onClick={() => setSelectedOrder(null)}
                   sx={{
                     px: 3,
                     borderRadius: 2,

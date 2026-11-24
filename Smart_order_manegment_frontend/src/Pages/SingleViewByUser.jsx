@@ -1,37 +1,43 @@
-import axios from "axios";
+
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
+
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableRow from "@mui/material/TableRow";
-import TableCell from "@mui/material/TableCell";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
-import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
-import EditIcon from "@mui/icons-material/Edit";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import Drawers1 from "../Component/Drawers1";
-import AddIcon from "@mui/icons-material/Add";
+import Chip from "@mui/material/Chip";
+import Divider from "@mui/material/Divider";
+import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
 
+import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
+import LocalOfferOutlinedIcon from "@mui/icons-material/LocalOfferOutlined";
+import VerifiedOutlinedIcon from "@mui/icons-material/VerifiedOutlined";
+
+import Drawers1 from "../Component/Drawers1";
 import PriceSummary from "../ReuseComponent/PriceSummary";
 
 export default function SingleViewByUser() {
   const [product, setProduct] = useState({});
   const [loading, setLoading] = useState(true);
+  const [quantity, setQuantity] = useState(1);
+  const [inputQuantity, setInputQuantity] = useState("1");
 
-  const [quantity, setquantity] = useState(1);
   const navigate = useNavigate();
-  const [inputQuantity, setInputQuantity] = useState(1);
   const { id } = useParams();
 
   useEffect(() => {
+    setLoading(true);
+
     axios
       .get(`http://localhost:5600/view/product/user/single-view/${id}`, {
         headers: {
@@ -39,8 +45,10 @@ export default function SingleViewByUser() {
         },
       })
       .then((res) => {
-        console.log("Product Data:", res.data.data);
-        setProduct(res.data.data);
+        const data = res.data.data;
+        setProduct(data);
+        setQuantity(1);
+        setInputQuantity("1");
       })
       .catch((er) => {
         console.log(er);
@@ -50,7 +58,8 @@ export default function SingleViewByUser() {
       });
   }, [id]);
 
-  // Product Image URL
+  const stock = Math.max(0, Number(product.stock) || 0);
+
   const imagePath = product.productImage;
 
   const imageUrl = imagePath
@@ -61,27 +70,77 @@ export default function SingleViewByUser() {
         : `http://localhost:5600/${imagePath.replace(/^\/+/, "")}`
     : "";
 
-  // Product Details
-  const productDetails = [
-    ["Product", product.productName],
-    ["Unit", product.stock],
-    ["SKU", product.sku],
-    ["Price", product.price],
-    ["Description", product.description],
-  ];
+  const handleQuantityChange = (value) => {
+    const newQuantity = Number(value);
+
+    if (!Number.isInteger(newQuantity) || newQuantity < 1) return;
+
+    if (newQuantity > stock) return;
+
+    setQuantity(newQuantity);
+    setInputQuantity(String(newQuantity));
+  };
+
+  const handleInputChange = (value) => {
+    setInputQuantity(value);
+
+    if (value === "") return;
+
+    const newQuantity = Number(value);
+
+    if (
+      Number.isInteger(newQuantity) &&
+      newQuantity >= 1 &&
+      newQuantity <= stock
+    ) {
+      setQuantity(newQuantity);
+    }
+  };
+
+  const handleAddQuantity = () => {
+    const newQuantity = Number(inputQuantity);
+
+    if (
+      !Number.isInteger(newQuantity) ||
+      newQuantity < 1 ||
+      newQuantity > stock
+    ) {
+      setInputQuantity(String(quantity));
+      return;
+    }
+
+    setQuantity(newQuantity);
+  };
 
   if (loading) {
     return (
-      <Box
-        sx={{
-          minHeight: "80vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <CircularProgress />
-      </Box>
+      <Drawers1>
+        <Box
+          sx={{
+            minHeight: "80vh",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      </Drawers1>
+    );
+  }
+
+  if (!product || !product._id) {
+    return (
+      <Drawers1>
+        <Box sx={{ p: 4, textAlign: "center", mt: 8 }}>
+          <Typography variant="h5" fontWeight={700}>
+            Product Not Found
+          </Typography>
+          <Button sx={{ mt: 2 }} onClick={() => navigate(-1)}>
+            Go Back
+          </Button>
+        </Box>
+      </Drawers1>
     );
   }
 
@@ -90,11 +149,13 @@ export default function SingleViewByUser() {
       <Box
         sx={{
           minHeight: "100vh",
-          bgcolor: "#f5f6f8",
-          p: { xs: 2, md: 3 },
+          bgcolor: "#f5f7fc",
+          px: { xs: 2, sm: 3, md: 4 },
+          py: 3,
+          pt: { xs: 8, md: 9 },
         }}
       >
-        {/* Heading */}
+        {/* PAGE HEADER */}
 
         <Stack
           direction={{ xs: "column", sm: "row" }}
@@ -102,239 +163,455 @@ export default function SingleViewByUser() {
           alignItems={{ xs: "flex-start", sm: "center" }}
           spacing={2}
           mb={3}
-          sx={{ mt: 6 }}
         >
           <Stack direction="row" spacing={2} alignItems="center">
-            <Avatar
+            <Box
               sx={{
-                bgcolor: "#e0eaff",
-                color: "#2563eb",
-                width: 50,
-                height: 50,
+                width: 52,
+                height: 52,
+                borderRadius: 3,
+                bgcolor: "#e9edff",
+                color: "#4f46e5",
+                display: "grid",
+                placeItems: "center",
               }}
             >
-              <ShoppingBagIcon />
-            </Avatar>
+              <ShoppingBagIcon fontSize="large" />
+            </Box>
 
             <Box>
-              <Typography variant="h4" fontWeight="bold">
+              <Typography
+                variant="h4"
+                fontWeight={800}
+                color="#172554"
+                sx={{ fontSize: { xs: 25, md: 30 } }}
+              >
                 Product Details
               </Typography>
 
-              <Typography color="text.secondary">
-                View complete product information
+              <Typography color="text.secondary" fontSize={14}>
+                Explore product information and pricing
               </Typography>
             </Box>
           </Stack>
 
-          <Stack direction="row" spacing={1}>
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBackIcon />}
-              onClick={() => navigate(-1)}
-            >
-              Back
-            </Button>
-          </Stack>
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            onClick={() => navigate(-1)}
+            sx={{
+              borderRadius: 2,
+              textTransform: "none",
+              fontWeight: 700,
+              px: 2.5,
+              py: 1,
+              borderColor: "#cbd5e1",
+              color: "#334155",
+            }}
+          >
+            Back to Products
+          </Button>
         </Stack>
 
-        {/* Main Content */}
+        {/* MAIN CONTENT */}
 
-        <Grid container spacing={3} sx={{ mt: 2 }}>
-          {/* Left Side - Product Details */}
+        <Grid container spacing={3} alignItems="flex-start">
 
-          <Grid size={{ xs: 12, md: 8 }}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: { xs: 2, md: 3 },
-                border: "1px solid #e2e8f0",
-                borderRadius: 3,
-                // height: "100%",
-              }}
-            >
-              {/* SKU Header */}
+          {/* LEFT PRODUCT INFORMATION */}
 
-              <Box
+          <Grid size={{ xs: 12, md: 7.5 }}>
+            <Stack spacing={3}>
+
+              {/* PRODUCT OVERVIEW */}
+
+              <Paper
+                elevation={0}
                 sx={{
-                  border: "1px solid #cbd5e1",
-                  p: 2,
-                  // width: { xs: "10%", sm: 300 },
-                  mb: 3,
-                  borderRadius: 1,
+                  p: { xs: 2, md: 3 },
+                  borderRadius: 4,
+                  border: "1px solid #e5eaf2",
+                  bgcolor: "#fff",
                 }}
               >
-                <Typography variant="body2" color="text.secondary" mb={1}>
-                  PRODUCT SKU
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  mb={3}
+                >
+                  <Typography variant="h6" fontWeight={800} color="#172554">
+                    Product Overview
+                  </Typography>
+
+                  <Chip
+                    icon={<VerifiedOutlinedIcon />}
+                    label="Verified Product"
+                    size="small"
+                    sx={{
+                      bgcolor: "#ecfdf5",
+                      color: "#047857",
+                      fontWeight: 700,
+                    }}
+                  />
+                </Stack>
+
+                <Box
+                  sx={{
+                    p: 2.5,
+                    borderRadius: 3,
+                    bgcolor: "#f5f7ff",
+                    border: "1px solid #e0e7ff",
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    color="#64748b"
+                    fontWeight={700}
+                    letterSpacing={1.2}
+                  >
+                    PRODUCT SKU
+                  </Typography>
+
+                  <Typography
+                    variant="h5"
+                    fontWeight={800}
+                    color="#3730a3"
+                    letterSpacing={2}
+                    mt={0.5}
+                    sx={{ wordBreak: "break-word" }}
+                  >
+                    {product.sku || "N/A"}
+                  </Typography>
+                </Box>
+
+                <Grid container spacing={2} mt={1}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Box
+                      sx={{
+                        p: 2,
+                        bgcolor: "#f8fafc",
+                        borderRadius: 3,
+                        border: "1px solid #edf0f5",
+                      }}
+                    >
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <LocalOfferOutlinedIcon color="primary" />
+                        <Typography color="text.secondary" fontSize={13}>
+                          Product Price
+                        </Typography>
+                      </Stack>
+
+                      <Typography
+                        variant="h5"
+                        fontWeight={800}
+                        color="#172554"
+                        mt={1}
+                      >
+                        ₹{Number(product.price || 0).toLocaleString("en-IN")}
+                      </Typography>
+                    </Box>
+                  </Grid>
+
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Box
+                      sx={{
+                        p: 2,
+                        bgcolor: "#f8fafc",
+                        borderRadius: 3,
+                        border: "1px solid #edf0f5",
+                      }}
+                    >
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Inventory2OutlinedIcon color="primary" />
+                        <Typography color="text.secondary" fontSize={13}>
+                          Available Stock
+                        </Typography>
+                      </Stack>
+
+                      <Typography
+                        variant="h5"
+                        fontWeight={800}
+                        color={stock > 0 ? "#059669" : "#dc2626"}
+                        mt={1}
+                      >
+                        {stock} Units
+                      </Typography>
+                    </Box>
+                  </Grid>
+                </Grid>
+
+                <Divider sx={{ my: 3 }} />
+
+                <Typography variant="h6" fontWeight={800} mb={2}>
+                  Product Information
                 </Typography>
 
-                <Typography variant="h5" fontWeight="bold" letterSpacing={2}>
-                  {product.sku || "N/A"}
-                </Typography>
-              </Box>
-
-              {/* Details Table */}
-
-              <Table
-                sx={{
-                  border: "1px solid #cbd5e1",
-                  "& td": {
-                    border: "1px solid #cbd5e1",
-                    py: 1.5,
-                    px: 1.8,
-                    fontSize: 15,
-                  },
-                }}
-              >
-                <TableBody>
-                  {productDetails.map(([label, value]) => (
-                    <TableRow key={label}>
-                      <TableCell
-                        sx={{
-                          width: "30%",
-                          color: "#16375b",
-                          fontWeight: 600,
-                          bgcolor: "#fafafa",
-                        }}
+                <Stack spacing={2}>
+                  {[
+                    ["Product Name", product.productName],
+                    ["SKU", product.sku],
+                    ["Available Units", product.stock],
+                    ["Unit Price", `₹${product.price || 0}`],
+                  ].map(([label, value]) => (
+                    <Stack
+                      key={label}
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="flex-start"
+                      spacing={2}
+                    >
+                      <Typography
+                        color="text.secondary"
+                        fontSize={14}
+                        fontWeight={600}
                       >
                         {label}
-                      </TableCell>
+                      </Typography>
 
-                      <TableCell
-                        sx={{
-                          color: "#222",
-                          fontWeight: 500,
-                          whiteSpace: "pre-wrap",
-                          wordBreak: "break-word",
-                        }}
+                      <Typography
+                        color="#1e293b"
+                        fontSize={14}
+                        fontWeight={700}
+                        textAlign="right"
+                        sx={{ wordBreak: "break-word" }}
                       >
-                        {value !== undefined && value !== null && value !== ""
-                          ? label === "Price"
-                            ? `₹${value}`
-                            : label === "Tax"
-                              ? `${value}%`
-                              : value
-                          : "None"}
-                      </TableCell>
-                    </TableRow>
+                        {value || "N/A"}
+                      </Typography>
+                    </Stack>
                   ))}
-                </TableBody>
-              </Table>
+                </Stack>
 
-              <Box
-                sx={{
-                  mt: 2,
-                  border: "1px solid #e2e8f0",
-                  p: 2,
-                  borderRadius: 2,
-                  bgcolor: "#fafafa",
-                }}
-              >
-                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                  Stock Details
+                <Divider sx={{ my: 3 }} />
+
+                <Typography variant="h6" fontWeight={800} mb={1}>
+                  Description
                 </Typography>
 
-                <Typography variant="h6">
-                  Available Stock in :{" "}
-                  <span style={{ fontWeight: "bold" }}>{product.stock}</span>
+                <Typography
+                  color="text.secondary"
+                  lineHeight={1.9}
+                  fontSize={14}
+                  sx={{ whiteSpace: "pre-wrap" }}
+                >
+                  {product.description || "No description available."}
+                </Typography>
+              </Paper>
+
+              {/* QUANTITY SELECTOR */}
+
+              <Paper
+                elevation={0}
+                sx={{
+                  p: { xs: 2, md: 3 },
+                  borderRadius: 4,
+                  border: "1px solid #e5eaf2",
+                }}
+              >
+                <Typography variant="h6" fontWeight={800} color="#172554">
+                  Select Quantity
+                </Typography>
+
+                <Typography color="text.secondary" fontSize={13} mt={0.5}>
+                  Choose how many units you want to purchase.
                 </Typography>
 
                 <Stack
                   direction={{ xs: "column", sm: "row" }}
                   spacing={2}
-                  alignItems="stretch"
-                  sx={{ mt: 2 }}
+                  alignItems={{ xs: "stretch", sm: "center" }}
+                  mt={3}
                 >
-                  <TextField
-                    name="stock"
-                    fullWidth
-                    type="number"
-                    label="Enter the quantity"
-                    value={inputQuantity}
-                    onChange={(e) => {
-                      setInputQuantity(e.target.value);
-                    }}
-                  />
-
-                  <Button
-                    startIcon={<AddIcon />}
-                    variant="outlined"
-                    sx={{ minWidth: 130 }}
-                    onClick={() => {
-                      setquantity(Number(inputQuantity));
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    sx={{
+                      border: "1px solid #cbd5e1",
+                      borderRadius: 2,
+                      width: "fit-content",
+                      overflow: "hidden",
                     }}
                   >
-                    Add
+                    <IconButton
+                      disabled={quantity <= 1}
+                      onClick={() => handleQuantityChange(quantity - 1)}
+                      sx={{ borderRadius: 0 }}
+                    >
+                      <RemoveIcon />
+                    </IconButton>
+
+                    <TextField
+                      type="number"
+                      value={inputQuantity}
+                      onChange={(e) => handleInputChange(e.target.value)}
+                      onBlur={handleAddQuantity}
+                      size="small"
+                      sx={{
+                        width: 85,
+                        "& fieldset": { border: "none" },
+                        "& input": {
+                          textAlign: "center",
+                          fontWeight: 800,
+                        },
+                      }}
+                      inputProps={{
+                        min: 1,
+                        max: stock,
+                      }}
+                    />
+
+                    <IconButton
+                      disabled={quantity >= stock}
+                      onClick={() => handleQuantityChange(quantity + 1)}
+                      sx={{ borderRadius: 0 }}
+                    >
+                      <AddIcon />
+                    </IconButton>
+                  </Stack>
+
+                  <Button
+                    variant="contained"
+                    startIcon={<ShoppingBagIcon />}
+                    onClick={handleAddQuantity}
+                    disabled={stock <= 0}
+                    sx={{
+                      px: 4,
+                      py: 1.5,
+                      borderRadius: 2,
+                      textTransform: "none",
+                      fontWeight: 800,
+                      bgcolor: "#4f46e5",
+                      boxShadow: "0 6px 15px rgba(79,70,229,0.2)",
+                      "&:hover": { bgcolor: "#3730a3" },
+                    }}
+                  >
+                    Update Quantity
                   </Button>
                 </Stack>
-              </Box>
-            </Paper>
+
+                <Typography
+                  color="text.secondary"
+                  fontSize={12}
+                  mt={2}
+                >
+                  Maximum available quantity: {stock} units
+                </Typography>
+
+                {stock <= 0 && (
+                  <Chip
+                    label="Currently Out of Stock"
+                    color="error"
+                    sx={{ mt: 2 }}
+                  />
+                )}
+              </Paper>
+            </Stack>
           </Grid>
 
-          {/* Right Side - Product Image */}
+          {/* RIGHT SIDE IMAGE + PRICE SUMMARY */}
 
-          <Grid size={{ xs: 12, md: 4 }}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 3,
-                border: "1px solid #e2e8f0",
-                borderRadius: 3,
-                textAlign: "center",
-                height: "fit-content",
-              }}
-            >
-              <Typography variant="h6" fontWeight="bold" mb={2}>
-                Product Image
-              </Typography>
+          <Grid size={{ xs: 12, md: 4.5 }}>
+            <Stack spacing={3}>
 
-              <Box
+              {/* IMAGE CARD */}
+
+              <Paper
+                elevation={0}
                 sx={{
-                  height: 280,
-                  bgcolor: "#f8fafc",
-                  borderRadius: 2,
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
+                  p: 2.5,
+                  borderRadius: 4,
+                  border: "1px solid #e5eaf2",
+                  position: "relative",
                   overflow: "hidden",
-                  border: "1px solid #edf0f5",
                 }}
               >
-                {imageUrl ? (
-                  <Box
-                    component="img"
-                    src={imageUrl}
-                    alt={product.productName}
-                    sx={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "contain",
-                      p: 2,
-                    }}
-                  />
-                ) : (
-                  <Typography color="text.secondary">
-                    No Product Image
-                  </Typography>
-                )}
-              </Box>
+                <Chip
+                  label="PRODUCT IMAGE"
+                  size="small"
+                  sx={{
+                    position: "absolute",
+                    top: 18,
+                    left: 18,
+                    zIndex: 1,
+                    bgcolor: "#eef2ff",
+                    color: "#4338ca",
+                    fontWeight: 800,
+                    fontSize: 10,
+                  }}
+                />
 
-              <Typography variant="subtitle1" fontWeight="600" mt={2}>
-                {product.productName || "Product Image"}
-              </Typography>
+                <Box
+                  sx={{
+                    height: { xs: 260, sm: 340 },
+                    mt: 2,
+                    bgcolor: "#f8fafc",
+                    borderRadius: 3,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    overflow: "hidden",
+                    border: "1px solid #edf0f5",
+                  }}
+                >
+                  {imageUrl ? (
+                    <Box
+                      component="img"
+                      src={imageUrl}
+                      alt={product.productName}
+                      sx={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                        p: 2,
+                        transition: "transform 0.35s ease",
+                        "&:hover": {
+                          transform: "scale(1.06)",
+                        },
+                      }}
+                    />
+                  ) : (
+                    <Stack alignItems="center" spacing={1}>
+                      <ShoppingBagIcon
+                        sx={{ fontSize: 55, color: "#cbd5e1" }}
+                      />
+                      <Typography color="text.secondary">
+                        No Product Image
+                      </Typography>
+                    </Stack>
+                  )}
+                </Box>
 
-              <Typography variant="body2" color="text.secondary" mt={1}>
-                {imagePath
-                  ? String(imagePath).split("/").pop()
-                  : "No image uploaded"}
-              </Typography>
-            </Paper>
+                <Typography
+                  variant="h6"
+                  fontWeight={800}
+                  color="#172554"
+                  mt={2}
+                >
+                  {product.productName}
+                </Typography>
 
-            <PriceSummary price={product.price} quantity={quantity} tax={5}  productId={product._id}/>
+                <Typography
+                  color="text.secondary"
+                  fontSize={12}
+                  mt={0.5}
+                  sx={{ wordBreak: "break-word" }}
+                >
+                  {imagePath
+                    ? String(imagePath).split("/").pop()
+                    : "No image uploaded"}
+                </Typography>
+              </Paper>
+
+              {/* PRICE SUMMARY */}
+
+              <PriceSummary
+                price={product.price}
+                quantity={quantity}
+                tax={5}
+                productId={product._id}
+              />
+            </Stack>
           </Grid>
         </Grid>
-        {/* available stock in  */}
-        <Box></Box>
       </Box>
     </Drawers1>
   );

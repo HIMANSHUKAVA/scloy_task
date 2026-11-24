@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import order_model from "../Model/OrdersModel.js";
 import product_model from "../Model/ProductModel.js";
-
+import { io } from "../app.js";
 export async function createorder(data, userId) {
   const { id, quantity } = data;
 
@@ -148,50 +148,99 @@ export async function GetAllOderByadmin() {
 }
 
 export async function CancelRequest(userid, orderid, reason) {
+  const session = await mongoose.startSession();
+
   try {
+    session.startTransaction();
+
+    // Step 1: Check order
     const order = await order_model.findOne({
       _id: orderid,
       userId: userid,
-    });
+    }).session(session);
 
     if (!order) {
       throw new Error("Order not found");
     }
 
+    // Step 2: Check cancellation reason
     if (!reason || !reason.trim()) {
       throw new Error("Cancellation reason is required");
     }
 
-    if (order.cancellation.status === "Pending") {
-      throw new Error("Cancellation request already pending");
-    }
+    // Step 3: Check order status
+    const notAllowedStatus = ["Out for Delivery", "Delivered"];
 
-    if (["Cancelled", "Delivered"].includes(order.orderStatus)) {
+    if (notAllowedStatus.includes(order.orderStatus)) {
       throw new Error("This order cannot be cancelled");
     }
 
-    const cancellation = {
-      requested: true,
-      reason: reason.trim(),
-      status: "Pending",
-      requestedAt: new Date(),
-    };
+    // Step 4: Restore product stock
+    for (const item of order.products) {
+      const updatedProduct = await product_model.findByIdAndUpdate(
+        item.productId,
+        {
+          $inc: {
+            stock: item.quantity,
+          },
+        },
+        {
+          session,
+          new: true,
+        }
+      );
 
+      if (!updatedProduct) {
+        throw new Error("Product not found during stock restoration");
+      }
+    }
+
+    // Step 5: Update order status
     const result = await order_model.findByIdAndUpdate(
       orderid,
       {
         $set: {
-          cancellation,
+          orderStatus: "Cancelled",
+          cancellation: {
+            requested: true,
+            reason: reason.trim(),
+            status: "Cancelled",
+            requestedAt: new Date(),
+          },
+          stockRestored: true,
+        },
+        $push: {
+          statusHistory: {
+            status: "Cancelled",
+            updatedBy: userid,
+            note: "Order cancelled by customer",
+          },
         },
       },
-      { new: true, runValidators: true },
+      {
+        new: true,
+        runValidators: true,
+        session,
+      }
     );
 
+    // Step 6: Commit transaction
+    await session.commitTransaction();
+
     return result;
+
   } catch (error) {
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
+
     throw error;
+
+  } finally {
+    await session.endSession();
   }
 }
+
 
 export async function Aproved_Request(orderid, adminid) {
   const session = await mongoose.startSession();
@@ -232,6 +281,7 @@ export async function Aproved_Request(orderid, adminid) {
       throw new Error("Order not found or cancellation already processed");
     }
 
+    const updatedproducts = [];
     // Step 2: Restore stock
     for (const item of result.products) {
       console.log("Order ID:", orderid);
@@ -244,16 +294,26 @@ export async function Aproved_Request(orderid, adminid) {
             stock: item.quantity,
           },
         },
-        { session  , new:true},
+        { session, new: true },
       );
 
       if (!updatedProduct) {
         throw new Error("Product not found during stock restoration");
       }
+
+      updatedproducts.push({
+        product_id: updatedProduct._id,
+        stock: updatedProduct.stock,
+      });
     }
 
     // Step 3: Commit transaction
     await session.commitTransaction();
+
+    io.emit("stockupdated", {
+      productId: updatedproducts._id,
+      stock: updatedproducts.stock,
+    });
 
     return result;
   } catch (error) {

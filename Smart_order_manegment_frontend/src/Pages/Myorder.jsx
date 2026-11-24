@@ -144,10 +144,11 @@ export default function Myorder() {
 
   const [cancelReason, setCancelReason] = useState("");
 
-  const navigate = useNavigate()
-  const handlcancelrequest = (id) => {
-    Swal.fire({
-      title: "Cancel Order Request",
+  const navigate = useNavigate();
+
+  const handlcancelrequest = async (id) => {
+    const result = await Swal.fire({
+      title: "Cancel Order",
       text: "Please enter the reason for cancelling your order.",
       input: "textarea",
       inputPlaceholder: "Enter your cancellation reason...",
@@ -155,7 +156,7 @@ export default function Myorder() {
         "aria-label": "Cancellation reason",
       },
       showCancelButton: true,
-      confirmButtonText: "Submit Request",
+      confirmButtonText: "Cancel Order",
       cancelButtonText: "Close",
       confirmButtonColor: "#d33",
 
@@ -164,51 +165,43 @@ export default function Myorder() {
           return "Please enter a cancellation reason!";
         }
       },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const reason = result.value.trim();
-
-        // Store reason in state
-        setCancelReason(reason);
-
-        axios
-          .post(
-            `http://localhost:5600/order/user/cancelrequest/${id}`,
-            {
-              reason: reason,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              },
-            },
-          )
-          .then((res) => {
-            console.log(res.data);
-
-            Swal.fire({
-              title: "Request Sent!",
-              text: res.data.message,
-              icon: "success",
-            });
-
-            navigate("/home")
-          })
-          .catch((er) => {
-            console.log(er);
-
-            Swal.fire({
-              title: "Error!",
-              text: er.response?.data?.message || "Something went wrong!",
-              icon: "error",
-            });
-          });
-      }
     });
 
-    
-    
-    
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    const reason = result.value.trim();
+
+    try {
+      const res = await axios.post(
+        `http://localhost:5600/order/user/cancelrequest/${id}`,
+        {
+          reason: reason,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
+
+      Swal.fire({
+        title: "Order Cancelled!",
+        text: res.data.message,
+        icon: "success",
+      });
+
+      navigate("/home");
+    } catch (er) {
+      console.log(er);
+
+      Swal.fire({
+        title: "Error!",
+        text: er.response?.data?.message || "Something went wrong!",
+        icon: "error",
+      });
+    }
   };
 
   return (

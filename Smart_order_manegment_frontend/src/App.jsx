@@ -23,6 +23,7 @@ import SingleViewByUser from "./Pages/SingleViewByUser"
 import Myorder from "./Pages/Myorder"
 import Wishlist from "./Pages/Wishlist";
 import ViewOrder from "./Admin/ViewOrder";
+import Cart from "./Pages/Cart";
 export default function App() {
   return (
     <BrowserRouter>
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="/view-single/:id" element={<SingleViewByUser/>}/>
           <Route path="/user/myorder" element={<Myorder/>}/>
           <Route path="/wishlist" element={<Wishlist/>}/>
+          <Route path="/cart" element={<Cart/>}/>
           
         </Route>
 

@@ -10,7 +10,7 @@ const cart_route = express.Router();
 
 cart_route.post("/user/:id" , VarifyTokenMiddlware , HasRoleMiddlware("User") , Add_Cart)
 cart_route.get("/user/cartlist" , VarifyTokenMiddlware , HasRoleMiddlware("User") , viewlist)
-cart_route.post("/user/removecart/:id" , VarifyTokenMiddlware , HasRoleMiddlware("User") , removecart)
+cart_route.delete("/user/removecart/:id" , VarifyTokenMiddlware , HasRoleMiddlware("User") , removecart)
 
 
 

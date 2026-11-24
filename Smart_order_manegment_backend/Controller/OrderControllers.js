@@ -8,6 +8,7 @@ import {
   Rejectcancelrequest,
   updateorderstatus,
 } from "../Model_API/Orders.js";
+import { io } from "../app.js";
 
 export async function create_order_user(req, resp) {
   console.log("CREATE ORDER CONTROLLER HIT");
@@ -111,6 +112,15 @@ export async function cancelrequest(req, resp) {
   try {
     const result = await CancelRequest(userid, orderid, reason);
 
+    if (
+      result.orderStatus === "Out for Delivery" ||
+      result.orderStatus === "Delivered" 
+    ) {
+      return resp.status(400).json({
+        message: "Order cannot be cancelled at this stage",
+      });
+    }
+
     return resp.status(200).json({
       deta: result,
       message: "Cancellation request sent successfully",
@@ -123,7 +133,6 @@ export async function cancelrequest(req, resp) {
     });
   }
 }
-
 
 export async function aproverd_request(req, resp) {
   const orderid = req.params.id;
@@ -142,14 +151,12 @@ export async function aproverd_request(req, resp) {
       deta: result,
       message: "Cancellation request approved successfully",
     });
-
   } catch (error) {
     return resp.status(500).json({
       message: error.message,
     });
   }
 }
-
 
 export async function reject(req, resp) {
   try {

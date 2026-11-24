@@ -1,5 +1,5 @@
 import add_to_cart_model from "../Model/addtocartmodel.js";
-
+import product_model from "../Model/ProductModel.js";
 export async function Addcart(userid, productid) {
   try {
     const result = await add_to_cart_model.findOneAndUpdate(
@@ -21,18 +21,44 @@ export async function Addcart(userid, productid) {
   }
 }
 
-export async function viewcart(userid) {
+export async function viewcart() {
   try {
-    const result = await add_to_cart_model
-      .findOne({ userId: userid})
+    const deta = await add_to_cart_model.find();
 
-    return result;
+    console.log(deta);
+    const cart = [];
+
+    for (const item of deta) {
+      for (const product of item.products) {
+        const cart_deta = await product_model.find(product.productId);
+
+        if (cart_deta) {
+          cart.push(cart_deta);
+        }
+      }
+    }
+
+    return cart;
   } catch (error) {
     throw error;
   }
 }
-export async function remove_cart(cartid, userid) {
-  const result = add_to_cart_model.findByIdAndDelete(cartid, userid);
+export async function remove_cart(productid, userid) {
+  const result = await add_to_cart_model.updateOne(
+    {
+      userId: userid,
+      "products.productId": productid,
+    },
+    {
+      $pull: {
+        products: {
+          productId: productid,
+        },
+      },
+    },
+  );
 
-  return result;
+  console.log("Remove Result:", result);
+
+  return result.modifiedCount > 0;
 }

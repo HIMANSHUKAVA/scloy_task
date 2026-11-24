@@ -31,7 +31,7 @@ import TextField from "@mui/material/TextField";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import InputAdornment from "@mui/material/InputAdornment";
-
+import { io } from "socket.io-client";
 export default function ViewOrder() {
   const [deta, setdeta] = useState([]);
   const navigate = useNavigate();
@@ -60,9 +60,34 @@ export default function ViewOrder() {
     }
   };
 
+  const socket = io("http://localhost:5600");
+
   useEffect(() => {
     FetchOrders();
+
+    const handleStockUpdate = (data) => {
+      setdeta((prev) =>
+        prev.map((item) => {
+          const updatedProduct = data.products.find(
+            (p) => String(p.productId) === String(item._id),
+          );
+
+          return updatedProduct
+            ? { ...item, stock: updatedProduct.stock }
+            : item;
+        }),
+      );
+    };
+
+    socket.on("stockupdated", (data) => {
+      console.log("Stock Updated:", handleStockUpdate);
+    });
+
+    return () => {
+      socket.off("stockupdated" , handleStockUpdate);
+    };
   }, []);
+
 
   // Order Status Select
   const handlstatusupdate = (orderId, newStatus) => {
@@ -303,21 +328,11 @@ export default function ViewOrder() {
                   <MenuItem value="Shipped">Shipped</MenuItem>
                   <MenuItem value="Out for Delivery">Out for Delivery</MenuItem>
                   <MenuItem value="Delivered">Delivered</MenuItem>
-                  <MenuItem value="Cancelled">Cancelled</MenuItem>
+                  
                 </Select>
               </FormControl>
 
-              <FormControl size="small" sx={{ minWidth: 180 }}>
-                <InputLabel>Cancellation</InputLabel>
-                <Select
-                  value={cancelfilter}
-                  label="Cancellation"
-                  onChange={(e) => setcancelfilter(e.target.value)}
-                >
-                  <MenuItem value="Approved">Approved</MenuItem>
-                  <MenuItem value="Rejected">Rejected</MenuItem>
-                </Select>
-              </FormControl>
+              
             </Box>
           </Box>
 
@@ -334,17 +349,14 @@ export default function ViewOrder() {
                     "Order Status",
                     "Cancellation",
                     "Action",
-                  ]
-
-                    
-                    .map((heading) => (
-                      <TableCell
-                        key={heading}
-                        sx={{ fontWeight: 700, color: "#475569" }}
-                      >
-                        {heading}
-                      </TableCell>
-                    ))}
+                  ].map((heading) => (
+                    <TableCell
+                      key={heading}
+                      sx={{ fontWeight: 700, color: "#475569" }}
+                    >
+                      {heading}
+                    </TableCell>
+                  ))}
                 </TableRow>
               </TableHead>
 
@@ -531,57 +543,8 @@ export default function ViewOrder() {
 
                         {/* Cancellation */}
                         <TableCell>
-                          {item.cancellation?.status === "Not Requested" ||
-                          !item.cancellation?.requested ? (
-                            <Chip
-                              label="Not Requested"
-                              size="small"
-                              color="default"
-                            />
-                          ) : (
-                            <Stack
-                              direction="row"
-                              spacing={1}
-                              alignItems="center"
-                            >
-                              <Select
-                                size="small"
-                                value={
-                                  cancelstatus[item._id] ??
-                                  item.cancellation?.status ??
-                                  "Not Requested"
-                                }
-                                onChange={(e) =>
-                                  handlcancelselect(item._id, e.target.value)
-                                }
-                                sx={{ minWidth: 140 }}
-                              >
-                                <MenuItem value="Pending">Pending</MenuItem>
-                                <MenuItem value="Approved">Approved</MenuItem>
-                                <MenuItem value="Rejected">Rejected</MenuItem>
-                              </Select>
-
-                              <Button
-                                variant="contained"
-                                color="primary"
-                                size="small"
-                                disabled={
-                                  item.cancellation?.status !== "Pending"
-                                }
-                                onClick={() =>
-                                  handlcancelstatus(
-                                    item._id,
-                                    cancelstatus[item._id] ??
-                                      item.cancellation?.status,
-                                  )
-                                }
-                              >
-                                Update
-                              </Button>
-                            </Stack>
-                          )}
+                          {item.cancellation?.status}
                         </TableCell>
-
                         {/* Action */}
                         <TableCell>
                           <Tooltip title="View Order Details">
@@ -607,7 +570,7 @@ export default function ViewOrder() {
                 count={filterdeta.length}
                 page={page}
                 rowsPerPage={rowperpage}
-                rowsPerPageOptions={[1,2, 5, 10]}
+                rowsPerPageOptions={[1, 2, 5, 10]}
                 onPageChange={(e, newpage) => setpage(newpage)}
                 onRowsPerPageChange={(e) => {
                   setrowperpage(parseInt(e.target.value, 10));

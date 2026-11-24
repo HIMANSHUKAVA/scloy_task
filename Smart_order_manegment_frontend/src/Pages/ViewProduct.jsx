@@ -1,8 +1,9 @@
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 import Drawers1 from "../Component/Drawers1";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
@@ -18,6 +19,9 @@ import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useNavigate } from "react-router-dom";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import Swal from "sweetalert2";
 
 export default function ViewProduct() {
   const [deta, setdeta] = useState([]);
@@ -42,6 +46,69 @@ export default function ViewProduct() {
   }, []);
 
   const navigate = useNavigate();
+
+  const HandleAddWishlist = (id) => {
+    axios
+      .post(
+        `http://localhost:5600/wish/user/add-wish/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      )
+      .then((res) => {
+        Swal.fire({
+          title: "Added to Wishlist!",
+          text: res.data.message || "Product added successfully.",
+          icon: "success",
+          timer: 1800,
+          showConfirmButton: false,
+        }).then(() => {
+          navigate("/wishlist");
+        });
+      })
+      .catch((er) => {
+        Swal.fire({
+          title: "Oops!",
+          text:
+            er.response?.data?.message || "Unable to add product to wishlist.",
+          icon: "error",
+          confirmButtonColor: "#d33",
+        });
+      });
+  };
+
+  const HandleAddCart = (id) => {
+    axios
+      .post(
+        `http://localhost:5600/cart/user/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      )
+      .then((res) => {
+        Swal.fire({
+          title: "Added to Cart!",
+          text: res.data.message || "Product added to cart successfully.",
+          icon: "success",
+          timer: 1800,
+          showConfirmButton: false,
+        });
+      })
+      .catch((er) => {
+        Swal.fire({
+          title: "Error!",
+          text: er.response?.data?.message || "Unable to add product to cart.",
+          icon: "error",
+          confirmButtonColor: "#d33",
+        });
+      });
+  };
   return (
     <Drawers1>
       <Box
@@ -49,7 +116,7 @@ export default function ViewProduct() {
           minHeight: "100vh",
           bgcolor: "#f4f6fb",
           p: { xs: 2, sm: 3, md: 4 },
-          width:"100%",
+          width: "100%",
           boxSizing: "border-box",
         }}
       >
@@ -115,9 +182,7 @@ export default function ViewProduct() {
               borderRadius: 4,
             }}
           >
-            <ShoppingBagIcon
-              sx={{ fontSize: 65, color: "#94a3b8", mb: 2 }}
-            />
+            <ShoppingBagIcon sx={{ fontSize: 65, color: "#94a3b8", mb: 2 }} />
 
             <Typography variant="h5" fontWeight="bold">
               No Products Found
@@ -246,12 +311,71 @@ export default function ViewProduct() {
                         textTransform: "none",
                         fontWeight: 700,
                       }}
-                      onClick={()=>{
-                        navigate(`/view-single/${item._id}`)
+                      onClick={() => {
+                        navigate(`/view-single/${item._id}`);
                       }}
                     >
                       View Details
                     </Button>
+
+                    <Stack
+                      direction="row"
+                      justifyContent="flex-end"
+                      alignItems="center"
+                      spacing={1.5}
+                      sx={{
+                        mt: 2,
+                        pt: 1.5,
+                        borderTop: "1px solid #e2e8f0",
+                      }}
+                    >
+                      {/* Wishlist Button */}
+                      <Tooltip title="Add to Wishlist">
+                        <IconButton
+                          onClick={() => HandleAddWishlist(item._id)}
+                          sx={{
+                            width: 42,
+                            height: 42,
+                            color: "#e53950",
+                            bgcolor: "#fff0f2",
+                            border: "1px solid #ffcdd2",
+                            borderRadius: 2,
+                            transition: "0.3s",
+                            "&:hover": {
+                              bgcolor: "#e53950",
+                              color: "#fff",
+                              transform: "scale(1.08)",
+                            },
+                          }}
+                        >
+                          <FavoriteIcon />
+                        </IconButton>
+                      </Tooltip>
+
+                      {/* Add To Cart Button */}
+                      <Tooltip title="Add to Cart">
+                        <IconButton
+                          disabled={item.stock <= 0}
+                          onClick={() => HandleAddCart(item._id)}
+                          sx={{
+                            width: 42,
+                            height: 42,
+                            color: "#2563eb",
+                            bgcolor: "#eff6ff",
+                            border: "1px solid #bfdbfe",
+                            borderRadius: 2,
+                            transition: "0.3s",
+                            "&:hover": {
+                              bgcolor: "#2563eb",
+                              color: "#fff",
+                              transform: "scale(1.08)",
+                            },
+                          }}
+                        >
+                          <AddShoppingCartIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Stack>
                   </CardContent>
                 </Card>
               </Grid>

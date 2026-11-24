@@ -1,5 +1,5 @@
 import wishlist_model from "../Model/Wishlist.js";
-import product_model from "../Model/ProductModel.js"
+import product_model from "../Model/ProductModel.js";
 
 export async function add_wish_list(productid, userid) {
   try {
@@ -23,14 +23,24 @@ export async function add_wish_list(productid, userid) {
 }
 
 export async function viewwishlist() {
-  
-  return wishlist_model.find();
+  const result = await wishlist_model.find();
+
+  const wishlist = [];
+
+  for (const item of result) {
+    for (const products of item.products) {
+      const productdeta = await product_model.findById(products.productId);
+
+      if (products) {
+        wishlist.push(productdeta);
+      }
+    }
+  }
+
+  return wishlist;
 }
 
-
-
 export async function find_single_wishlist(productid) {
- 
   return product_model.findById(productid);
 }
 

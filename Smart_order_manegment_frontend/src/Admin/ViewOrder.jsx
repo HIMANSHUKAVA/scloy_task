@@ -464,9 +464,8 @@ export default function ViewOrder() {
       responseType: "blob",
     });
 
-
     console.log(responce);
-    
+
     const url = window.URL.createObjectURL(responce.data);
 
     console.log(url);
@@ -1099,29 +1098,31 @@ export default function ViewOrder() {
                               </IconButton>
                             </Tooltip>
 
-                            <Tooltip title="Download Invoice">
-                              <IconButton
-                                sx={{
-                                  bgcolor: "#E8EEFF",
-                                  color: "#3457D5",
-                                  borderRadius: 2,
-                                  transition: "all 0.2s ease",
+                            {item.orderStatus === "Delivered" ? (
+                              <Tooltip title="Download Invoice">
+                                <IconButton
+                                  sx={{
+                                    bgcolor: "#E8EEFF",
+                                    color: "#3457D5",
+                                    borderRadius: 2,
+                                    transition: "all 0.2s ease",
 
-                                  "&:hover": {
-                                    bgcolor: "#3457D5",
-                                    color: "#FFFFFF",
-                                    transform: "translateY(-2px)",
-                                    boxShadow:
-                                      "0 4px 10px rgba(52,87,213,0.25)",
-                                  },
-                                }}
-                                onClick={() => {
-                                  handlinvoicegeneretion(item._id);
-                                }}
-                              >
-                                <FileCopyOutlinedIcon />
-                              </IconButton>
-                            </Tooltip>
+                                    "&:hover": {
+                                      bgcolor: "#3457D5",
+                                      color: "#FFFFFF",
+                                      transform: "translateY(-2px)",
+                                      boxShadow:
+                                        "0 4px 10px rgba(52,87,213,0.25)",
+                                    },
+                                  }}
+                                  onClick={() => {
+                                    handlinvoicegeneretion(item._id);
+                                  }}
+                                >
+                                  <FileCopyOutlinedIcon />
+                                </IconButton>
+                              </Tooltip>
+                            ) : null}
                           </TableCell>
                         </TableRow>
                       );

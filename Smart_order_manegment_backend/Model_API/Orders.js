@@ -96,7 +96,7 @@ export async function createorder(data, userId) {
 }
 
 export async function getmyorders() {
-  const result = await order_model.find();
+  const result = await order_model.find().sort({createdAt:-1});
 
   return result;
 }
@@ -142,7 +142,7 @@ export async function updateorderstatus(orderid, status, adminId) {
 }
 
 export async function GetAllOderByadmin() {
-  const result = await order_model.find();
+  const result = await order_model.find().sort({createdAt : -1});
 
   return result;
 }

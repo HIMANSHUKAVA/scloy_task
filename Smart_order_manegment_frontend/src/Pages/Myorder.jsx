@@ -102,9 +102,8 @@ export default function Myorder() {
   const totalOrders = order.length;
 
   const DownloadInvoice = async (orderId) => {
-
     console.log(orderId);
-    
+
     try {
       const response = await axios.get(
         `http://localhost:5600/pdf/user/${orderId}`,
@@ -610,7 +609,7 @@ export default function Myorder() {
           alignItems="center"
           mb={2.5}
         >
-          <Box sx={{mt:7}}>
+          <Box sx={{ mt: 4 }}>
             <Typography variant="h5" fontWeight={800} color="#172554">
               Recent Orders
             </Typography>
@@ -1008,22 +1007,26 @@ export default function Myorder() {
                         Track Order
                       </Button>
 
-                      <Button
-                        variant="contained"
-                        startIcon={<InsertDriveFileIcon />}
-                        onClick={() => DownloadInvoice(item._id)}
-                        sx={{
-                          borderRadius: 2,
-                          px: 2.5,
-                          py: 1.2,
-                          bgcolor: "#4f46e5",
-                          textTransform: "none",
-                          fontWeight: 700,
-                          "&:hover": { bgcolor: "#4338ca" },
-                        }}
-                      >
-                        Generet Invoice
-                      </Button>
+                      {item.orderStatus === "Delivered" ? (
+                        <Button
+                          variant="contained"
+                          startIcon={<InsertDriveFileIcon />}
+                          onClick={() => DownloadInvoice(item._id)}
+                          sx={{
+                            borderRadius: 2,
+                            px: 2.5,
+                            py: 1.2,
+                            bgcolor: "#4f46e5",
+                            textTransform: "none",
+                            fontWeight: 700,
+                            "&:hover": {
+                              bgcolor: "#4338ca",
+                            },
+                          }}
+                        >
+                          Generate Invoice
+                        </Button>
+                      ) : null}
                       <Button
                         variant="outlined"
                         color="error"

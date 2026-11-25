@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -75,14 +74,11 @@ export default function Viewproduct() {
     setloading(true);
 
     try {
-      const res = await axios.get(
-        `${API}/view/product/admin/viewdeta`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await axios.get(`${API}/view/product/admin/viewdeta`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       setproduct(res.data.data || []);
     } catch (er) {
@@ -91,9 +87,7 @@ export default function Viewproduct() {
       Swal.fire({
         icon: "error",
         title: "Failed to load products",
-        text:
-          er.response?.data?.message ||
-          "Unable to fetch products",
+        text: er.response?.data?.message || "Unable to fetch products",
       });
     } finally {
       setloading(false);
@@ -110,35 +104,25 @@ export default function Viewproduct() {
 
   const totalStock = product.reduce(
     (total, item) => total + (Number(item.stock) || 0),
-    0
+    0,
   );
 
   const lowStock = product.filter(
-    (item) =>
-      Number(item.stock) > 0 &&
-      Number(item.stock) <= 5
+    (item) => Number(item.stock) > 0 && Number(item.stock) <= 5,
   ).length;
 
-  const outOfStock = product.filter(
-    (item) => Number(item.stock) <= 0
-  ).length;
+  const outOfStock = product.filter((item) => Number(item.stock) <= 0).length;
 
   const inventoryValue = product.reduce(
     (total, item) =>
-      total +
-      (Number(item.price) || 0) *
-        (Number(item.stock) || 0),
-    0
+      total + (Number(item.price) || 0) * (Number(item.stock) || 0),
+    0,
   );
 
   // ================= CATEGORY LIST =================
 
   const categories = [
-    ...new Set(
-      product
-        .map((item) => item.category)
-        .filter(Boolean)
-    ),
+    ...new Set(product.map((item) => item.category).filter(Boolean)),
   ];
 
   // ================= SEARCH + FILTER + SORT =================
@@ -160,31 +144,23 @@ export default function Viewproduct() {
         ].some((field) =>
           String(field ?? "")
             .toLowerCase()
-            .includes(value)
-        )
+            .includes(value),
+        ),
       );
     }
 
     if (categoryFilter !== "All") {
-      result = result.filter(
-        (item) => item.category === categoryFilter
-      );
+      result = result.filter((item) => item.category === categoryFilter);
     }
 
     if (stockFilter === "In Stock") {
-      result = result.filter(
-        (item) => Number(item.stock) > 5
-      );
+      result = result.filter((item) => Number(item.stock) > 5);
     } else if (stockFilter === "Low Stock") {
       result = result.filter(
-        (item) =>
-          Number(item.stock) > 0 &&
-          Number(item.stock) <= 5
+        (item) => Number(item.stock) > 0 && Number(item.stock) <= 5,
       );
     } else if (stockFilter === "Out of Stock") {
-      result = result.filter(
-        (item) => Number(item.stock) <= 0
-      );
+      result = result.filter((item) => Number(item.stock) <= 0);
     }
 
     result.sort((a, b) => {
@@ -193,41 +169,26 @@ export default function Viewproduct() {
 
       let comparison;
 
-      if (
-        typeof first === "number" &&
-        typeof second === "number"
-      ) {
+      if (typeof first === "number" && typeof second === "number") {
         comparison = first - second;
       } else {
-        comparison = String(first).localeCompare(
-          String(second),
-          undefined,
-          { numeric: true, sensitivity: "base" }
-        );
+        comparison = String(first).localeCompare(String(second), undefined, {
+          numeric: true,
+          sensitivity: "base",
+        });
       }
 
-      return sortOrder === "asc"
-        ? comparison
-        : -comparison;
+      return sortOrder === "asc" ? comparison : -comparison;
     });
 
     return result;
-  }, [
-    product,
-    search,
-    categoryFilter,
-    stockFilter,
-    sortField,
-    sortOrder,
-  ]);
+  }, [product, search, categoryFilter, stockFilter, sortField, sortOrder]);
 
   // ================= SORT HANDLER =================
 
   const handleSort = (field) => {
     if (sortField === field) {
-      setsortOrder((prev) =>
-        prev === "asc" ? "desc" : "asc"
-      );
+      setsortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
       setsortField(field);
       setsortOrder("asc");
@@ -263,23 +224,15 @@ export default function Viewproduct() {
     if (!result.isConfirmed) return;
 
     try {
-      const res = await axios.delete(
-        `${API}/view/delete-product/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await axios.delete(`${API}/view/delete-product/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      setproduct((prev) =>
-        prev.filter((item) => item._id !== id)
-      );
+      setproduct((prev) => prev.filter((item) => item._id !== id));
 
-      if (
-        page > 0 &&
-        filteredProducts.length - 1 <= page * rowperpage
-      ) {
+      if (page > 0 && filteredProducts.length - 1 <= page * rowperpage) {
         setpage((prev) => prev - 1);
       }
 
@@ -293,9 +246,7 @@ export default function Viewproduct() {
       Swal.fire({
         icon: "error",
         title: "Delete Failed",
-        text:
-          er.response?.data?.message ||
-          "Something went wrong",
+        text: er.response?.data?.message || "Something went wrong",
       });
     }
   };
@@ -412,11 +363,7 @@ export default function Viewproduct() {
                 Products
               </Typography>
 
-              <Typography
-                variant="body2"
-                color="#64748b"
-                sx={{ mt: 0.5 }}
-              >
+              <Typography variant="body2" color="#64748b" sx={{ mt: 0.5 }}>
                 Manage your product catalog and inventory
               </Typography>
             </Box>
@@ -468,75 +415,102 @@ export default function Viewproduct() {
 
         {/* ================= STATS CARDS ================= */}
 
-        <Grid container spacing={2.5} mb={4}>
+        {/* ================= STATS CARDS ================= */}
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "minmax(0, 1fr)",
+              sm: "repeat(2, minmax(0, 1fr))",
+              lg: "repeat(4, minmax(0, 1fr))",
+            },
+            gap: { xs: 2, sm: 2.5 },
+            mb: 4,
+            width: "100%",
+          }}
+        >
           {stats.map((item) => (
-            <Grid item xs={12} sm={6} lg={3} key={item.title}>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2.5,
-                  height: "100%",
-                  borderRadius: 3,
-                  border: "1px solid #e8edf5",
-                  bgcolor: "#ffffff",
-                  transition: "0.25s",
-                  "&:hover": {
-                    transform: "translateY(-3px)",
-                    boxShadow: "0 10px 25px rgba(15,23,42,0.06)",
-                  },
-                  mt:2
-                }}
+            <Paper
+              key={item.title}
+              elevation={0}
+              sx={{
+                width: "100%",
+                minWidth: 0,
+                boxSizing: "border-box",
+                p: { xs: 2, sm: 2.5 },
+                borderRadius: 3,
+                border: "1px solid #e8edf5",
+                bgcolor: "#ffffff",
+                transition: "0.25s",
+                "&:hover": {
+                  transform: { xs: "none", sm: "translateY(-3px)" },
+                  boxShadow: "0 10px 25px rgba(15,23,42,0.06)",
+                },
+              }}
+            >
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                spacing={1.5}
               >
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="flex-start"
-                >
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      color="#64748b"
-                      fontWeight={600}
-                    >
-                      {item.title}
-                    </Typography>
-
-                    <Typography
-                      variant="h4"
-                      fontWeight={800}
-                      color="#172554"
-                      sx={{ mt: 1 }}
-                    >
-                      {item.value}
-                    </Typography>
-
-                    <Typography
-                      variant="caption"
-                      color="#94a3b8"
-                      sx={{ display: "block", mt: 1 }}
-                    >
-                      {item.subtitle}
-                    </Typography>
-                  </Box>
-
-                  <Avatar
-                    variant="rounded"
+                <Box sx={{ minWidth: 0, flex: 1 }}>
+                  <Typography
+                    variant="body2"
+                    color="#64748b"
+                    fontWeight={600}
                     sx={{
-                      width: 48,
-                      height: 48,
-                      bgcolor: item.bg,
-                      color: item.color,
-                      borderRadius: 2.5,
+                      fontSize: { xs: 12, sm: 14 },
+                      overflowWrap: "anywhere",
                     }}
                   >
-                    {item.icon}
-                  </Avatar>
-                </Stack>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
+                    {item.title}
+                  </Typography>
 
+                  <Typography
+                    fontWeight={800}
+                    color="#172554"
+                    sx={{
+                      fontSize: { xs: 27, sm: 32 },
+                      mt: 1,
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {item.value}
+                  </Typography>
+
+                  <Typography
+                    variant="caption"
+                    color="#94a3b8"
+                    sx={{
+                      display: "block",
+                      mt: 1,
+                      fontSize: { xs: 10, sm: 12 },
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {item.subtitle}
+                  </Typography>
+                </Box>
+
+                <Avatar
+                  variant="rounded"
+                  sx={{
+                    width: { xs: 44, sm: 52 },
+                    height: { xs: 44, sm: 52 },
+                    flexShrink: 0,
+                    bgcolor: item.bg,
+                    color: item.color,
+                    borderRadius: 2.5,
+                  }}
+                >
+                  {item.icon}
+                </Avatar>
+              </Stack>
+            </Paper>
+          ))}
+        </Box>
         {/* ================= INVENTORY SUMMARY ================= */}
 
         <Paper
@@ -547,7 +521,7 @@ export default function Viewproduct() {
             borderRadius: 3,
             border: "1px solid #e8edf5",
             bgcolor: "#ffffff",
-            mt:8
+            mt: 8,
           }}
         >
           <Stack
@@ -580,17 +554,10 @@ export default function Viewproduct() {
             </Stack>
 
             <Box>
-              <Typography
-                variant="h5"
-                fontWeight={800}
-                color="#059669"
-              >
+              <Typography variant="h5" fontWeight={800} color="#059669">
                 ₹{inventoryValue.toLocaleString("en-IN")}
               </Typography>
-              <Typography
-                variant="caption"
-                color="#94a3b8"
-              >
+              <Typography variant="caption" color="#94a3b8">
                 Price × Available stock
               </Typography>
             </Box>
@@ -618,11 +585,7 @@ export default function Viewproduct() {
               spacing={1}
             >
               <Box>
-                <Typography
-                  variant="h6"
-                  fontWeight={800}
-                  color="#172554"
-                >
+                <Typography variant="h6" fontWeight={800} color="#172554">
                   All Products
                 </Typography>
 
@@ -681,10 +644,7 @@ export default function Viewproduct() {
               }}
             />
 
-            <FormControl
-              size="small"
-              sx={{ minWidth: 155 }}
-            >
+            <FormControl size="small" sx={{ minWidth: 155 }}>
               <Select
                 value={categoryFilter}
                 onChange={(e) => {
@@ -714,10 +674,7 @@ export default function Viewproduct() {
               </Select>
             </FormControl>
 
-            <FormControl
-              size="small"
-              sx={{ minWidth: 155 }}
-            >
+            <FormControl size="small" sx={{ minWidth: 155 }}>
               <Select
                 value={stockFilter}
                 onChange={(e) => {
@@ -726,9 +683,7 @@ export default function Viewproduct() {
                 }}
                 startAdornment={
                   <InputAdornment position="start">
-                    <FilterListIcon
-                      sx={{ color: "#64748b", fontSize: 19 }}
-                    />
+                    <FilterListIcon sx={{ color: "#64748b", fontSize: 19 }} />
                   </InputAdornment>
                 }
                 sx={{
@@ -739,9 +694,7 @@ export default function Viewproduct() {
                 <MenuItem value="All">All Stock</MenuItem>
                 <MenuItem value="In Stock">In Stock</MenuItem>
                 <MenuItem value="Low Stock">Low Stock</MenuItem>
-                <MenuItem value="Out of Stock">
-                  Out of Stock
-                </MenuItem>
+                <MenuItem value="Out of Stock">Out of Stock</MenuItem>
               </Select>
             </FormControl>
 
@@ -798,9 +751,7 @@ export default function Viewproduct() {
                   ].map((col) => (
                     <TableCell
                       key={col.label}
-                      onClick={() =>
-                        col.field && handleSort(col.field)
-                      }
+                      onClick={() => col.field && handleSort(col.field)}
                       sx={{
                         cursor: col.field ? "pointer" : "default",
                       }}
@@ -812,9 +763,7 @@ export default function Viewproduct() {
                             sx={{
                               fontSize: 15,
                               color:
-                                sortField === col.field
-                                  ? "#4f46e5"
-                                  : "#cbd5e1",
+                                sortField === col.field ? "#4f46e5" : "#cbd5e1",
                             }}
                           />
                         )}
@@ -837,10 +786,7 @@ export default function Viewproduct() {
                 {loading ? (
                   <TableRow>
                     <TableCell colSpan={8} align="center" sx={{ py: 8 }}>
-                      <CircularProgress
-                        size={35}
-                        sx={{ color: "#4f46e5" }}
-                      />
+                      <CircularProgress size={35} sx={{ color: "#4f46e5" }} />
                       <Typography
                         color="#94a3b8"
                         variant="body2"
@@ -881,10 +827,7 @@ export default function Viewproduct() {
                   </TableRow>
                 ) : (
                   filteredProducts
-                    .slice(
-                      page * rowperpage,
-                      page * rowperpage + rowperpage
-                    )
+                    .slice(page * rowperpage, page * rowperpage + rowperpage)
                     .map((item) => {
                       const imageUrl = item.productImage
                         ? item.productImage.startsWith("http")
@@ -953,10 +896,7 @@ export default function Viewproduct() {
                                   {item.productName}
                                 </Typography>
 
-                                <Typography
-                                  variant="caption"
-                                  color="#94a3b8"
-                                >
+                                <Typography variant="caption" color="#94a3b8">
                                   ID: {item._id?.slice(-8)}
                                 </Typography>
                               </Box>
@@ -1018,7 +958,7 @@ export default function Viewproduct() {
                                 variant="determinate"
                                 value={Math.min(
                                   ((Number(item.stock) || 0) / 50) * 100,
-                                  100
+                                  100,
                                 )}
                                 sx={{
                                   height: 5,
@@ -1147,124 +1087,144 @@ export default function Viewproduct() {
               "& .MuiTablePagination-toolbar": {
                 minHeight: 60,
               },
-              "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows": {
-                color: "#64748b",
-                fontSize: 12,
-                fontWeight: 600,
-              },
+              "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
+                {
+                  color: "#64748b",
+                  fontSize: 12,
+                  fontWeight: 600,
+                },
             }}
           />
         </Paper>
 
         {/* ================= BOTTOM INVENTORY INSIGHT ================= */}
 
-        <Grid container spacing={2.5} mt={1}>
-          <Grid item xs={12} md={6}>
-            <Paper
-              elevation={0}
+        {/* ================= BOTTOM INVENTORY INSIGHT ================= */}
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "minmax(0, 1fr)",
+              md: "repeat(2, minmax(0, 1fr))",
+            },
+            gap: { xs: 2, sm: 2.5 },
+            mt: 2,
+            width: "100%",
+          }}
+        >
+          {/* LOW STOCK ALERT */}
+
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 2, sm: 2.5 },
+              width: "100%",
+              minWidth: 0,
+              boxSizing: "border-box",
+              borderRadius: 3,
+              border: "1px solid #e8edf5",
+              bgcolor: "#ffffff",
+            }}
+          >
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <Avatar
+                sx={{
+                  bgcolor: "#fffbeb",
+                  color: "#d97706",
+                  flexShrink: 0,
+                }}
+              >
+                <WarningAmberOutlinedIcon />
+              </Avatar>
+
+              <Box sx={{ minWidth: 0 }}>
+                <Typography fontWeight={800} color="#172554">
+                  Low Stock Alert
+                </Typography>
+
+                <Typography
+                  variant="body2"
+                  color="#64748b"
+                  sx={{ fontSize: { xs: 12, sm: 14 } }}
+                >
+                  Products that need restocking
+                </Typography>
+              </Box>
+            </Stack>
+
+            <Typography
+              fontWeight={800}
+              color="#d97706"
               sx={{
-                p: 2.5,
-                borderRadius: 3,
-                border: "1px solid #e8edf5",
-                bgcolor: "#ffffff",
-                height: "100%",
+                mt: 2,
+                fontSize: { xs: 28, sm: 32 },
               }}
             >
-              <Stack direction="row" spacing={1.5} alignItems="center">
-                <Avatar
-                  sx={{
-                    bgcolor: "#fffbeb",
-                    color: "#d97706",
-                  }}
+              {lowStock}
+            </Typography>
+
+            <Typography variant="caption" color="#94a3b8">
+              Products with 1 to 5 units remaining
+            </Typography>
+          </Paper>
+
+          {/* PRODUCT CATEGORIES */}
+
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 2, sm: 2.5 },
+              width: "100%",
+              minWidth: 0,
+              boxSizing: "border-box",
+              borderRadius: 3,
+              border: "1px solid #e8edf5",
+              bgcolor: "#ffffff",
+            }}
+          >
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <Avatar
+                sx={{
+                  bgcolor: "#eef2ff",
+                  color: "#4f46e5",
+                  flexShrink: 0,
+                }}
+              >
+                <CategoryOutlinedIcon />
+              </Avatar>
+
+              <Box sx={{ minWidth: 0 }}>
+                <Typography fontWeight={800} color="#172554">
+                  Product Categories
+                </Typography>
+
+                <Typography
+                  variant="body2"
+                  color="#64748b"
+                  sx={{ fontSize: { xs: 12, sm: 14 } }}
                 >
-                  <WarningAmberOutlinedIcon />
-                </Avatar>
+                  Categories in your product catalog
+                </Typography>
+              </Box>
+            </Stack>
 
-                <Box>
-                  <Typography fontWeight={800} color="#172554">
-                    Low Stock Alert
-                  </Typography>
-
-                  <Typography
-                    variant="body2"
-                    color="#64748b"
-                  >
-                    Products that need restocking
-                  </Typography>
-                </Box>
-              </Stack>
-
-              <Typography
-                variant="h4"
-                fontWeight={800}
-                color="#d97706"
-                sx={{ mt: 2 }}
-              >
-                {lowStock}
-              </Typography>
-
-              <Typography
-                variant="caption"
-                color="#94a3b8"
-              >
-                Products with 1 to 5 units remaining
-              </Typography>
-            </Paper>
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <Paper
-              elevation={0}
+            <Typography
+              fontWeight={800}
+              color="#4f46e5"
               sx={{
-                p: 2.5,
-                borderRadius: 3,
-                border: "1px solid #e8edf5",
-                bgcolor: "#ffffff",
-                height: "100%",
+                mt: 2,
+                fontSize: { xs: 28, sm: 32 },
               }}
             >
-              <Stack direction="row" spacing={1.5} alignItems="center">
-                <Avatar
-                  sx={{
-                    bgcolor: "#eef2ff",
-                    color: "#4f46e5",
-                  }}
-                >
-                  <CategoryOutlinedIcon />
-                </Avatar>
+              {categories.length}
+            </Typography>
 
-                <Box>
-                  <Typography fontWeight={800} color="#172554">
-                    Product Categories
-                  </Typography>
-
-                  <Typography
-                    variant="body2"
-                    color="#64748b"
-                  >
-                    Categories in your product catalog
-                  </Typography>
-                </Box>
-              </Stack>
-
-              <Typography
-                variant="h4"
-                fontWeight={800}
-                color="#4f46e5"
-                sx={{ mt: 2 }}
-              >
-                {categories.length}
-              </Typography>
-
-              <Typography
-                variant="caption"
-                color="#94a3b8"
-              >
-                Total unique product categories
-              </Typography>
-            </Paper>
-          </Grid>
-        </Grid>
+            <Typography variant="caption" color="#94a3b8">
+              Total unique product categories
+            </Typography>
+          </Paper>
+        </Box>
       </Box>
     </AdminDrawer>
   );

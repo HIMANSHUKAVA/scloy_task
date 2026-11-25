@@ -526,52 +526,57 @@ export default function ViewOrder() {
 
         {/* STATISTICS */}
 
-        <Grid container spacing={2.5} sx={{ mb: 3.5 }}>
-          <Grid item xs={12} sm={6} lg={3}>
-            <StatCard
-              title="Total Orders"
-              value={totalOrders}
-              subtitle="All customer orders"
-              icon={<ShoppingBagRoundedIcon />}
-              color="#4f46e5"
-              background="#eef2ff"
-            />
-          </Grid>
+        {/* ================= ORDER STATISTICS CARDS ================= */}
 
-          <Grid item xs={12} sm={6} lg={3}>
-            <StatCard
-              title="Pending Orders"
-              value={pendingOrders}
-              subtitle="Orders waiting for processing"
-              icon={<PendingActionsRoundedIcon />}
-              color="#d97706"
-              background="#fef3c7"
-            />
-          </Grid>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "minmax(0, 1fr)",
+              sm: "repeat(2, minmax(0, 1fr))",
+              lg: "repeat(4, minmax(0, 1fr))",
+            },
+            gap: { xs: 2, sm: 2.5 },
+            mb: 3.5,
+            width: "100%",
+          }}
+        >
+          <StatCard
+            title="Total Orders"
+            value={totalOrders}
+            subtitle="All customer orders"
+            icon={<ShoppingBagRoundedIcon />}
+            color="#4f46e5"
+            background="#eef2ff"
+          />
 
-          <Grid item xs={12} sm={6} lg={3}>
-            <StatCard
-              title="Delivered Orders"
-              value={deliveredOrders}
-              subtitle="Successfully delivered orders"
-              icon={<LocalShippingRoundedIcon />}
-              color="#059669"
-              background="#d1fae5"
-            />
-          </Grid>
+          <StatCard
+            title="Pending Orders"
+            value={pendingOrders}
+            subtitle="Orders waiting for processing"
+            icon={<PendingActionsRoundedIcon />}
+            color="#d97706"
+            background="#fef3c7"
+          />
 
-          <Grid item xs={12} sm={6} lg={3}>
-            <StatCard
-              title="Cancellation Requests"
-              value={cancellationRequests}
-              subtitle="Requests awaiting review"
-              icon={<CancelPresentationRoundedIcon />}
-              color="#dc2626"
-              background="#fee2e2"
-            />
-          </Grid>
-        </Grid>
+          <StatCard
+            title="Delivered Orders"
+            value={deliveredOrders}
+            subtitle="Successfully delivered orders"
+            icon={<LocalShippingRoundedIcon />}
+            color="#059669"
+            background="#d1fae5"
+          />
 
+          <StatCard
+            title="Cancellation Requests"
+            value={cancellationRequests}
+            subtitle="Requests awaiting review"
+            icon={<CancelPresentationRoundedIcon />}
+            color="#dc2626"
+            background="#fee2e2"
+          />
+        </Box>
         {/* ORDER TABLE */}
 
         <Paper

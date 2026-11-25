@@ -3,31 +3,31 @@ import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography';
-import Avatar from '@mui/material/Avatar';
-import Stack from '@mui/material/Stack';
-import Grid from '@mui/material/Grid';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import TablePagination from '@mui/material/TablePagination';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import Switch from '@mui/material/Switch';
-import Chip from '@mui/material/Chip';
-import TextField from '@mui/material/TextField';
-import InputAdornment from '@mui/material/InputAdornment';
-import MenuItem from '@mui/material/MenuItem';
-import Divider from '@mui/material/Divider';
-import LinearProgress from '@mui/material/LinearProgress';
-import Button from '@mui/material/Button';
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import Avatar from "@mui/material/Avatar";
+import Stack from "@mui/material/Stack";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TablePagination from "@mui/material/TablePagination";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import Switch from "@mui/material/Switch";
+import Chip from "@mui/material/Chip";
+import TextField from "@mui/material/TextField";
+import InputAdornment from "@mui/material/InputAdornment";
+import MenuItem from "@mui/material/MenuItem";
+import Divider from "@mui/material/Divider";
+import LinearProgress from "@mui/material/LinearProgress";
+import Button from "@mui/material/Button";
+
 import PeopleAltRoundedIcon from "@mui/icons-material/PeopleAltRounded";
 import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import PersonOffRoundedIcon from "@mui/icons-material/PersonOffRounded";
@@ -56,10 +56,7 @@ export default function AdminHome() {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
-  // --------------------------------
-  // Fetch Users
-  // --------------------------------
-
+  // FETCH USERS
   const fetchUsers = async () => {
     setLoading(true);
 
@@ -91,10 +88,7 @@ export default function AdminHome() {
     fetchUsers();
   }, []);
 
-  // --------------------------------
-  // Dynamic Statistics
-  // --------------------------------
-
+  // STATISTICS
   const totalUsers = deta.length;
 
   const activeUsers = deta.filter(
@@ -108,10 +102,7 @@ export default function AdminHome() {
       ? Math.round((activeUsers / totalUsers) * 100)
       : 0;
 
-  // --------------------------------
-  // Search and Filter
-  // --------------------------------
-
+  // SEARCH AND FILTER
   const filteredUsers = useMemo(() => {
     return deta.filter((user) => {
       const username = user.username?.toLowerCase() || "";
@@ -130,10 +121,7 @@ export default function AdminHome() {
     });
   }, [deta, search, filterStatus]);
 
-  // --------------------------------
-  // Pagination
-  // --------------------------------
-
+  // PAGINATION
   const handlePageChange = (event, newPage) => {
     setpage(newPage);
   };
@@ -143,18 +131,12 @@ export default function AdminHome() {
     setpage(0);
   };
 
-  // --------------------------------
-  // Edit User
-  // --------------------------------
-
+  // EDIT USER
   const handleEdit = (id) => {
     navigate(`/admin/edit/${id}`);
   };
 
-  // --------------------------------
-  // Delete User
-  // --------------------------------
-
+  // DELETE USER
   const handleDelete = async (id) => {
     const result = await Swal.fire({
       title: "Delete User?",
@@ -183,10 +165,7 @@ export default function AdminHome() {
 
         setdeta(updated);
 
-        if (
-          page > 0 &&
-          page * rowperpage >= updated.length
-        ) {
+        if (page > 0 && page * rowperpage >= updated.length) {
           setpage(page - 1);
         }
 
@@ -207,10 +186,7 @@ export default function AdminHome() {
     }
   };
 
-  // --------------------------------
-  // Toggle User Status
-  // --------------------------------
-
+  // TOGGLE USER STATUS
   const handleToggle = async (id, isActive) => {
     try {
       const res = await axios.put(
@@ -250,10 +226,7 @@ export default function AdminHome() {
     }
   };
 
-  // --------------------------------
-  // Statistics Card Component
-  // --------------------------------
-
+  // STATISTICS CARD
   const StatCard = ({
     title,
     value,
@@ -265,33 +238,44 @@ export default function AdminHome() {
     <Card
       elevation={0}
       sx={{
+        width: "100%",
+        minWidth: 0,
         height: "100%",
+        boxSizing: "border-box",
         border: "1px solid #e5e7eb",
         borderRadius: 3,
         transition: "0.25s",
         "&:hover": {
-          transform: "translateY(-4px)",
+          transform: { xs: "none", sm: "translateY(-4px)" },
           boxShadow: "0 10px 25px rgba(15,23,42,0.07)",
         },
       }}
     >
-      <CardContent sx={{ p: 2.5 }}>
+      <CardContent
+        sx={{
+          p: { xs: 2, sm: 2.5 },
+          "&:last-child": {
+            pb: { xs: 2, sm: 2.5 },
+          },
+        }}
+      >
         <Stack
           direction="row"
           justifyContent="space-between"
           alignItems="center"
+          spacing={1.5}
         >
-          <Box>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
             <Typography
               color="#64748b"
               fontWeight={600}
-              fontSize={13}
+              fontSize={{ xs: 13, sm: 14 }}
             >
               {title}
             </Typography>
 
             <Typography
-              fontSize={29}
+              fontSize={{ xs: 27, sm: 29 }}
               fontWeight={800}
               color="#111827"
               sx={{ mt: 1 }}
@@ -300,9 +284,12 @@ export default function AdminHome() {
             </Typography>
 
             <Typography
-              fontSize={11}
+              fontSize={{ xs: 11, sm: 12 }}
               color="#94a3b8"
-              sx={{ mt: 0.7 }}
+              sx={{
+                mt: 0.7,
+                lineHeight: 1.5,
+              }}
             >
               {subtitle}
             </Typography>
@@ -311,8 +298,9 @@ export default function AdminHome() {
           <Avatar
             variant="rounded"
             sx={{
-              width: 52,
-              height: 52,
+              width: { xs: 48, sm: 56 },
+              height: { xs: 48, sm: 56 },
+              flexShrink: 0,
               bgcolor: background,
               color: color,
               borderRadius: 2.5,
@@ -325,17 +313,23 @@ export default function AdminHome() {
     </Card>
   );
 
-  // --------------------------------
-  // Main UI
-  // --------------------------------
-
   return (
     <AdminDrawer>
       <Box
         sx={{
+          width: "100%",
+          maxWidth: "100%",
+          minWidth: 0,
           minHeight: "100vh",
-          p: { xs: 2, sm: 3, md: 4 },
+          boxSizing: "border-box",
+          p: {
+            xs: 1.5,
+            sm: 2.5,
+            md: 3,
+            lg: 4,
+          },
           background: "#f8fafc",
+          overflowX: "hidden",
         }}
       >
         {/* PAGE HEADER */}
@@ -343,13 +337,13 @@ export default function AdminHome() {
         <Stack
           direction={{ xs: "column", sm: "row" }}
           justifyContent="space-between"
-          alignItems={{ xs: "flex-start", sm: "center" }}
+          alignItems={{ xs: "stretch", sm: "center" }}
           spacing={2}
-          sx={{ mb: 3.5 }}
+          sx={{ mb: { xs: 2.5, sm: 3.5 } }}
         >
           <Box>
             <Typography
-              fontSize={26}
+              fontSize={{ xs: 22, sm: 26 }}
               fontWeight={800}
               color="#111827"
             >
@@ -358,7 +352,7 @@ export default function AdminHome() {
 
             <Typography
               color="#94a3b8"
-              fontSize={13}
+              fontSize={12}
               sx={{ mt: 0.7 }}
             >
               Dashboard / Users / Manage Users
@@ -366,17 +360,21 @@ export default function AdminHome() {
           </Box>
 
           <Button
+            fullWidth
             variant="outlined"
             startIcon={<RefreshRoundedIcon />}
             onClick={fetchUsers}
             disabled={loading}
             sx={{
+              width: { xs: "100%", sm: "auto" },
               textTransform: "none",
               fontWeight: 700,
               borderRadius: 2,
               borderColor: "#dbe1ea",
               color: "#475569",
-              px: 2,
+              px: 2.5,
+              py: 1.1,
+              whiteSpace: "nowrap",
             }}
           >
             Refresh Data
@@ -385,57 +383,65 @@ export default function AdminHome() {
 
         {/* STATISTICS CARDS */}
 
-        <Grid container spacing={2.5} sx={{ mb: 3.5 }}>
-          <Grid item xs={12} sm={6} lg={3}>
-            <StatCard
-              title="Total Users"
-              value={totalUsers}
-              subtitle="All registered accounts"
-              icon={<PeopleAltRoundedIcon />}
-              color="#4f46e5"
-              background="#eef2ff"
-            />
-          </Grid>
+        <Box
+          sx={{
+            display: "grid",
+            width: "100%",
+            minWidth: 0,
+            gridTemplateColumns: {
+              xs: "minmax(0, 1fr)",
+              sm: "repeat(2, minmax(0, 1fr))",
+              lg: "repeat(4, minmax(0, 1fr))",
+            },
+            gap: { xs: 1.5, sm: 2, md: 2.5 },
+            mb: { xs: 2.5, sm: 3.5 },
+          }}
+        >
+          <StatCard
+            title="Total Users"
+            value={totalUsers}
+            subtitle="All registered accounts"
+            icon={<PeopleAltRoundedIcon />}
+            color="#4f46e5"
+            background="#eef2ff"
+          />
 
-          <Grid item xs={12} sm={6} lg={3}>
-            <StatCard
-              title="Active Users"
-              value={activeUsers}
-              subtitle="Currently enabled accounts"
-              icon={<PersonAddAlt1RoundedIcon />}
-              color="#059669"
-              background="#d1fae5"
-            />
-          </Grid>
+          <StatCard
+            title="Active Users"
+            value={activeUsers}
+            subtitle="Currently enabled accounts"
+            icon={<PersonAddAlt1RoundedIcon />}
+            color="#059669"
+            background="#d1fae5"
+          />
 
-          <Grid item xs={12} sm={6} lg={3}>
-            <StatCard
-              title="Disabled Users"
-              value={disabledUsers}
-              subtitle="Currently disabled accounts"
-              icon={<PersonOffRoundedIcon />}
-              color="#dc2626"
-              background="#fee2e2"
-            />
-          </Grid>
+          <StatCard
+            title="Disabled Users"
+            value={disabledUsers}
+            subtitle="Currently disabled accounts"
+            icon={<PersonOffRoundedIcon />}
+            color="#dc2626"
+            background="#fee2e2"
+          />
 
-          <Grid item xs={12} sm={6} lg={3}>
-            <StatCard
-              title="Active Rate"
-              value={`${activePercentage}%`}
-              subtitle="Active accounts percentage"
-              icon={<TrendingUpRoundedIcon />}
-              color="#d97706"
-              background="#fef3c7"
-            />
-          </Grid>
-        </Grid>
+          <StatCard
+            title="Active Rate"
+            value={`${activePercentage}%`}
+            subtitle="Active accounts percentage"
+            icon={<TrendingUpRoundedIcon />}
+            color="#d97706"
+            background="#fef3c7"
+          />
+        </Box>
 
         {/* USER TABLE SECTION */}
 
         <Paper
           elevation={0}
           sx={{
+            width: "100%",
+            minWidth: 0,
+            boxSizing: "border-box",
             border: "1px solid #e5e7eb",
             borderRadius: 3,
             overflow: "hidden",
@@ -444,11 +450,11 @@ export default function AdminHome() {
         >
           {/* TABLE HEADER */}
 
-          <Box sx={{ p: 2.5 }}>
+          <Box sx={{ p: { xs: 1.8, sm: 2.5 } }}>
             <Stack
               direction={{ xs: "column", md: "row" }}
               justifyContent="space-between"
-              alignItems={{ xs: "flex-start", md: "center" }}
+              alignItems={{ xs: "stretch", md: "center" }}
               spacing={2}
             >
               <Box>
@@ -472,9 +478,12 @@ export default function AdminHome() {
               <Stack
                 direction={{ xs: "column", sm: "row" }}
                 spacing={1.5}
-                width={{ xs: "100%", md: "auto" }}
+                sx={{
+                  width: { xs: "100%", md: "auto" },
+                }}
               >
                 <TextField
+                  fullWidth
                   size="small"
                   placeholder="Search name or email..."
                   value={search}
@@ -503,6 +512,7 @@ export default function AdminHome() {
 
                 <TextField
                   select
+                  fullWidth
                   size="small"
                   value={filterStatus}
                   onChange={(e) => {
@@ -529,7 +539,12 @@ export default function AdminHome() {
 
           {/* TABLE */}
 
-          <TableContainer sx={{ overflowX: "auto" }}>
+          <TableContainer
+            sx={{
+              width: "100%",
+              overflowX: "auto",
+            }}
+          >
             <Table sx={{ minWidth: 750 }}>
               <TableHead>
                 <TableRow
@@ -558,10 +573,7 @@ export default function AdminHome() {
                 {loading ? (
                   <TableRow>
                     <TableCell colSpan={5} align="center">
-                      <Typography
-                        color="#64748b"
-                        sx={{ py: 5 }}
-                      >
+                      <Typography color="#64748b" sx={{ py: 5 }}>
                         Loading users...
                       </Typography>
                     </TableCell>
@@ -647,9 +659,7 @@ export default function AdminHome() {
                                 fontSize: 15,
                               }}
                             >
-                              {er.username
-                                ?.charAt(0)
-                                .toUpperCase()}
+                              {er.username?.charAt(0).toUpperCase()}
                             </Avatar>
 
                             <Box>
@@ -689,6 +699,7 @@ export default function AdminHome() {
                             <Typography
                               fontSize={12}
                               color="#475569"
+                              sx={{ whiteSpace: "nowrap" }}
                             >
                               {er.email}
                             </Typography>
@@ -718,9 +729,7 @@ export default function AdminHome() {
                             <Chip
                               size="small"
                               label={
-                                er.isActive
-                                  ? "Active"
-                                  : "Disabled"
+                                er.isActive ? "Active" : "Disabled"
                               }
                               sx={{
                                 fontWeight: 700,
@@ -747,9 +756,7 @@ export default function AdminHome() {
                           >
                             <Tooltip title="Edit User">
                               <IconButton
-                                onClick={() =>
-                                  handleEdit(er._id)
-                                }
+                                onClick={() => handleEdit(er._id)}
                                 size="small"
                                 sx={{
                                   bgcolor: "#eef2ff",
@@ -766,9 +773,7 @@ export default function AdminHome() {
 
                             <Tooltip title="Delete User">
                               <IconButton
-                                onClick={() =>
-                                  handleDelete(er._id)
-                                }
+                                onClick={() => handleDelete(er._id)}
                                 size="small"
                                 sx={{
                                   bgcolor: "#fee2e2",
@@ -808,295 +813,288 @@ export default function AdminHome() {
               border: "none",
               "& .MuiTablePagination-toolbar": {
                 minHeight: 58,
+                px: { xs: 1, sm: 2 },
+                flexWrap: { xs: "wrap", sm: "nowrap" },
+                justifyContent: "center",
               },
-              "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows": {
-                fontSize: 12,
-                color: "#64748b",
-              },
+              "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
+                {
+                  fontSize: 12,
+                  color: "#64748b",
+                },
             }}
           />
         </Paper>
 
         {/* USER ACCESS OVERVIEW */}
 
-        <Grid container spacing={2.5}>
-          <Grid item xs={12} md={7}>
-            <Card
-              elevation={0}
-              sx={{
-                height: "100%",
-                border: "1px solid #e5e7eb",
-                borderRadius: 3,
-              }}
-            >
-              <CardContent sx={{ p: 3 }}>
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  spacing={1.5}
-                  sx={{ mb: 3 }}
-                >
-                  <Avatar
-                    variant="rounded"
-                    sx={{
-                      bgcolor: "#eef2ff",
-                      color: "#4f46e5",
-                      borderRadius: 2,
-                    }}
-                  >
-                    <ShieldRoundedIcon />
-                  </Avatar>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "minmax(0, 1fr)",
+              md: "minmax(0, 7fr) minmax(0, 5fr)",
+            },
+            gap: { xs: 2, sm: 2.5 },
+            width: "100%",
+            minWidth: 0,
+          }}
+        >
+          {/* USER ACCESS CARD */}
 
-                  <Box>
-                    <Typography
-                      fontWeight={800}
-                      fontSize={16}
-                      color="#111827"
-                    >
-                      User Access Overview
-                    </Typography>
-
-                    <Typography
-                      color="#94a3b8"
-                      fontSize={11}
-                    >
-                      Current account status distribution
-                    </Typography>
-                  </Box>
-                </Stack>
-
-                {/* ACTIVE USERS */}
-
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  sx={{ mb: 1 }}
-                >
-                  <Typography
-                    fontSize={12}
-                    fontWeight={600}
-                    color="#475569"
-                  >
-                    Active Accounts
-                  </Typography>
-
-                  <Typography
-                    fontSize={12}
-                    fontWeight={800}
-                    color="#059669"
-                  >
-                    {activeUsers} ({activePercentage}%)
-                  </Typography>
-                </Stack>
-
-                <LinearProgress
-                  variant="determinate"
-                  value={activePercentage}
+          <Card
+            elevation={0}
+            sx={{
+              width: "100%",
+              minWidth: 0,
+              height: "100%",
+              border: "1px solid #e5e7eb",
+              borderRadius: 3,
+            }}
+          >
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={1.5}
+                sx={{ mb: 3 }}
+              >
+                <Avatar
+                  variant="rounded"
                   sx={{
-                    height: 9,
-                    borderRadius: 5,
-                    bgcolor: "#e5e7eb",
-                    "& .MuiLinearProgress-bar": {
-                      bgcolor: "#10b981",
-                      borderRadius: 5,
-                    },
+                    bgcolor: "#eef2ff",
+                    color: "#4f46e5",
+                    borderRadius: 2,
                   }}
-                />
-
-                {/* DISABLED USERS */}
-
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  sx={{ mt: 3, mb: 1 }}
                 >
-                  <Typography
-                    fontSize={12}
-                    fontWeight={600}
-                    color="#475569"
-                  >
-                    Disabled Accounts
-                  </Typography>
+                  <ShieldRoundedIcon />
+                </Avatar>
 
-                  <Typography
-                    fontSize={12}
-                    fontWeight={800}
-                    color="#dc2626"
-                  >
-                    {disabledUsers} (
-                    {100 - activePercentage}%)
-                  </Typography>
-                </Stack>
-
-                <LinearProgress
-                  variant="determinate"
-                  value={
-                    totalUsers > 0
-                      ? (disabledUsers / totalUsers) * 100
-                      : 0
-                  }
-                  sx={{
-                    height: 9,
-                    borderRadius: 5,
-                    bgcolor: "#e5e7eb",
-                    "& .MuiLinearProgress-bar": {
-                      bgcolor: "#ef4444",
-                      borderRadius: 5,
-                    },
-                  }}
-                />
-
-                <Divider sx={{ my: 3 }} />
-
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                >
-                  <Typography
-                    fontSize={12}
-                    color="#64748b"
-                  >
-                    Total Registered Accounts
-                  </Typography>
-
+                <Box>
                   <Typography
                     fontWeight={800}
-                    fontSize={14}
+                    fontSize={16}
                     color="#111827"
                   >
+                    User Access Overview
+                  </Typography>
+
+                  <Typography color="#94a3b8" fontSize={11}>
+                    Current account status distribution
+                  </Typography>
+                </Box>
+              </Stack>
+
+              {/* ACTIVE USERS */}
+
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                spacing={1}
+                sx={{ mb: 1 }}
+              >
+                <Typography
+                  fontSize={12}
+                  fontWeight={600}
+                  color="#475569"
+                >
+                  Active Accounts
+                </Typography>
+
+                <Typography
+                  fontSize={12}
+                  fontWeight={800}
+                  color="#059669"
+                >
+                  {activeUsers} ({activePercentage}%)
+                </Typography>
+              </Stack>
+
+              <LinearProgress
+                variant="determinate"
+                value={activePercentage}
+                sx={{
+                  height: 9,
+                  borderRadius: 5,
+                  bgcolor: "#e5e7eb",
+                  "& .MuiLinearProgress-bar": {
+                    bgcolor: "#10b981",
+                    borderRadius: 5,
+                  },
+                }}
+              />
+
+              {/* DISABLED USERS */}
+
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                spacing={1}
+                sx={{ mt: 3, mb: 1 }}
+              >
+                <Typography
+                  fontSize={12}
+                  fontWeight={600}
+                  color="#475569"
+                >
+                  Disabled Accounts
+                </Typography>
+
+                <Typography
+                  fontSize={12}
+                  fontWeight={800}
+                  color="#dc2626"
+                >
+                  {disabledUsers} ({100 - activePercentage}%)
+                </Typography>
+              </Stack>
+
+              <LinearProgress
+                variant="determinate"
+                value={
+                  totalUsers > 0
+                    ? (disabledUsers / totalUsers) * 100
+                    : 0
+                }
+                sx={{
+                  height: 9,
+                  borderRadius: 5,
+                  bgcolor: "#e5e7eb",
+                  "& .MuiLinearProgress-bar": {
+                    bgcolor: "#ef4444",
+                    borderRadius: 5,
+                  },
+                }}
+              />
+
+              <Divider sx={{ my: 3 }} />
+
+              <Stack direction="row" justifyContent="space-between">
+                <Typography fontSize={12} color="#64748b">
+                  Total Registered Accounts
+                </Typography>
+
+                <Typography
+                  fontWeight={800}
+                  fontSize={14}
+                  color="#111827"
+                >
+                  {totalUsers}
+                </Typography>
+              </Stack>
+            </CardContent>
+          </Card>
+
+          {/* ACCOUNT MANAGEMENT CARD */}
+
+          <Card
+            elevation={0}
+            sx={{
+              width: "100%",
+              minWidth: 0,
+              height: "100%",
+              border: "1px solid #e5e7eb",
+              borderRadius: 3,
+            }}
+          >
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={1.5}
+                sx={{ mb: 2.5 }}
+              >
+                <Avatar
+                  variant="rounded"
+                  sx={{
+                    bgcolor: "#fef3c7",
+                    color: "#d97706",
+                    borderRadius: 2,
+                  }}
+                >
+                  <PeopleAltRoundedIcon />
+                </Avatar>
+
+                <Box>
+                  <Typography
+                    fontWeight={800}
+                    fontSize={16}
+                    color="#111827"
+                  >
+                    Account Management
+                  </Typography>
+
+                  <Typography fontSize={11} color="#94a3b8">
+                    User administration summary
+                  </Typography>
+                </Box>
+              </Stack>
+
+              <Stack spacing={2}>
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Typography fontSize={13} color="#64748b">
+                    Total Accounts
+                  </Typography>
+
+                  <Typography fontWeight={800} color="#111827">
                     {totalUsers}
                   </Typography>
                 </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
 
-          {/* MANAGEMENT INFORMATION */}
+                <Divider />
 
-          <Grid item xs={12} md={5}>
-            <Card
-              elevation={0}
-              sx={{
-                height: "100%",
-                border: "1px solid #e5e7eb",
-                borderRadius: 3,
-              }}
-            >
-              <CardContent sx={{ p: 3 }}>
                 <Stack
                   direction="row"
+                  justifyContent="space-between"
                   alignItems="center"
-                  spacing={1.5}
-                  sx={{ mb: 2.5 }}
                 >
-                  <Avatar
-                    variant="rounded"
-                    sx={{
-                      bgcolor: "#fef3c7",
-                      color: "#d97706",
-                      borderRadius: 2,
-                    }}
-                  >
-                    <PeopleAltRoundedIcon />
-                  </Avatar>
-
-                  <Box>
-                    <Typography
-                      fontWeight={800}
-                      fontSize={16}
-                      color="#111827"
-                    >
-                      Account Management
-                    </Typography>
-
-                    <Typography
-                      fontSize={11}
-                      color="#94a3b8"
-                    >
-                      User administration summary
-                    </Typography>
-                  </Box>
-                </Stack>
-
-                <Stack spacing={2}>
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                  >
-                    <Typography
-                      fontSize={13}
-                      color="#64748b"
-                    >
-                      Total Accounts
-                    </Typography>
-
-                    <Typography
-                      fontWeight={800}
-                      color="#111827"
-                    >
-                      {totalUsers}
-                    </Typography>
-                  </Stack>
-
-                  <Divider />
-
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                  >
-                    <Typography
-                      fontSize={13}
-                      color="#64748b"
-                    >
-                      Enabled Accounts
-                    </Typography>
-
-                    <Chip
-                      label={activeUsers}
-                      size="small"
-                      color="success"
-                    />
-                  </Stack>
-
-                  <Divider />
-
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                  >
-                    <Typography
-                      fontSize={13}
-                      color="#64748b"
-                    >
-                      Disabled Accounts
-                    </Typography>
-
-                    <Chip
-                      label={disabledUsers}
-                      size="small"
-                      color="error"
-                    />
-                  </Stack>
-
-                  <Divider />
-
-                  <Typography
-                    fontSize={11}
-                    color="#94a3b8"
-                    sx={{ lineHeight: 1.7 }}
-                  >
-                    Manage user permissions and account
-                    availability using the controls in the
-                    registered users table.
+                  <Typography fontSize={13} color="#64748b">
+                    Enabled Accounts
                   </Typography>
+
+                  <Chip
+                    label={activeUsers}
+                    size="small"
+                    color="success"
+                  />
                 </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+
+                <Divider />
+
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Typography fontSize={13} color="#64748b">
+                    Disabled Accounts
+                  </Typography>
+
+                  <Chip
+                    label={disabledUsers}
+                    size="small"
+                    color="error"
+                  />
+                </Stack>
+
+                <Divider />
+
+                <Typography
+                  fontSize={11}
+                  color="#94a3b8"
+                  sx={{ lineHeight: 1.7 }}
+                >
+                  Manage user permissions and account availability
+                  using the controls in the registered users table.
+                </Typography>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Box>
 
         {/* FOOTER */}
 
@@ -1107,10 +1105,7 @@ export default function AdminHome() {
             pb: 2,
           }}
         >
-          <Typography
-            fontSize={11}
-            color="#94a3b8"
-          >
+          <Typography fontSize={11} color="#94a3b8">
             OrderFlow Admin Panel • User Management
           </Typography>
         </Box>

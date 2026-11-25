@@ -435,7 +435,7 @@ export default function Singleview() {
 
             {/* Main Layout */}
 
-            <Grid container spacing={3}>
+            <Grid container spacing={3} sx={{mt:8}}>
 
               {/* Left Column */}
 

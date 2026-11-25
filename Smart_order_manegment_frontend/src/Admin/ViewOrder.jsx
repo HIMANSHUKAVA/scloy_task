@@ -1,45 +1,41 @@
-
-import React, {
-  useEffect,
-  useState,
-  useMemo,
-  useCallback,
-} from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 
 import axios from "axios";
 import AdminDrawer from "./AdminDrawer";
+import FileCopyOutlinedIcon from "@mui/icons-material/FileCopyOutlined";
 import Swal from "sweetalert2";
 import { io } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
-import Avatar from '@mui/material/Avatar';
-import TableContainer from '@mui/material/TableContainer';
-import Table from '@mui/material/Table';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import Chip from '@mui/material/Chip';
-import Tooltip from '@mui/material/Tooltip';
-import IconButton from '@mui/material/IconButton';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import CircularProgress from '@mui/material/CircularProgress';
-import TablePagination from '@mui/material/TablePagination';
-import TextField from '@mui/material/TextField';
-import InputAdornment from '@mui/material/InputAdornment';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Grid from '@mui/material/Grid';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Divider from '@mui/material/Divider';
-import LinearProgress from '@mui/material/LinearProgress';
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import Avatar from "@mui/material/Avatar";
+import TableContainer from "@mui/material/TableContainer";
+import Table from "@mui/material/Table";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import Chip from "@mui/material/Chip";
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import CircularProgress from "@mui/material/CircularProgress";
+import TablePagination from "@mui/material/TablePagination";
+import TextField from "@mui/material/TextField";
+import InputAdornment from "@mui/material/InputAdornment";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Grid from "@mui/material/Grid";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Divider from "@mui/material/Divider";
+import LinearProgress from "@mui/material/LinearProgress";
 import ShoppingBagRoundedIcon from "@mui/icons-material/ShoppingBagRounded";
 import PendingActionsRoundedIcon from "@mui/icons-material/PendingActionsRounded";
 import LocalShippingRoundedIcon from "@mui/icons-material/LocalShippingRounded";
@@ -87,7 +83,7 @@ export default function ViewOrder() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       setdeta(res.data.deta || []);
@@ -127,23 +123,21 @@ export default function ViewOrder() {
   const totalOrders = deta.length;
 
   const pendingOrders = deta.filter(
-    (item) => item.orderStatus === "Pending"
+    (item) => item.orderStatus === "Pending",
   ).length;
 
   const deliveredOrders = deta.filter(
-    (item) => item.orderStatus === "Delivered"
+    (item) => item.orderStatus === "Delivered",
   ).length;
 
   const cancellationRequests = deta.filter(
     (item) =>
       item.cancellation?.status === "Requested" ||
-      item.cancellation?.status === "Pending"
+      item.cancellation?.status === "Pending",
   ).length;
 
   const deliveredPercentage =
-    totalOrders > 0
-      ? Math.round((deliveredOrders / totalOrders) * 100)
-      : 0;
+    totalOrders > 0 ? Math.round((deliveredOrders / totalOrders) * 100) : 0;
 
   // --------------------------------
   // SEARCH AND FILTER
@@ -167,17 +161,15 @@ export default function ViewOrder() {
             product.name?.toLowerCase().includes(searchText) ||
             product.productId?.toString().toLowerCase().includes(searchText) ||
             product.price?.toString().includes(searchText) ||
-            product.quantity?.toString().includes(searchText)
+            product.quantity?.toString().includes(searchText),
         );
 
       const orderMatch =
-        orderfilter === "All" ||
-        item.orderStatus === orderfilter;
+        orderfilter === "All" || item.orderStatus === orderfilter;
 
       const cancelMatch =
         cancelfilter === "All" ||
-        (cancelfilter === "No Request" &&
-          !item.cancellation?.status) ||
+        (cancelfilter === "No Request" && !item.cancellation?.status) ||
         item.cancellation?.status === cancelfilter;
 
       return searchMatch && orderMatch && cancelMatch;
@@ -240,15 +232,13 @@ export default function ViewOrder() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       setdeta((prev) =>
         prev.map((item) =>
-          item._id === id
-            ? { ...item, ...res.data.deta }
-            : item
-        )
+          item._id === id ? { ...item, ...res.data.deta } : item,
+        ),
       );
 
       setstatus((prev) => {
@@ -292,26 +282,20 @@ export default function ViewOrder() {
 
     const confirm = await Swal.fire({
       icon: "warning",
-      title: isApproved
-        ? "Approve Cancellation?"
-        : "Reject Cancellation?",
+      title: isApproved ? "Approve Cancellation?" : "Reject Cancellation?",
       text: isApproved
         ? "Are you sure you want to approve this cancellation?"
         : "Are you sure you want to reject this cancellation?",
       showCancelButton: true,
       confirmButtonColor: isApproved ? "#059669" : "#dc2626",
-      confirmButtonText: isApproved
-        ? "Yes, Approve"
-        : "Yes, Reject",
+      confirmButtonText: isApproved ? "Yes, Approve" : "Yes, Reject",
       cancelButtonText: "Cancel",
     });
 
     if (!confirm.isConfirmed) return;
 
     try {
-      const endpoint = isApproved
-        ? "approvedrequest"
-        : "rejectrequest";
+      const endpoint = isApproved ? "approvedrequest" : "rejectrequest";
 
       const res = await axios.put(
         `http://localhost:5600/order/admin/${endpoint}/${id}`,
@@ -320,15 +304,13 @@ export default function ViewOrder() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       setdeta((prev) =>
         prev.map((item) =>
-          item._id === id
-            ? { ...item, ...res.data.deta }
-            : item
-        )
+          item._id === id ? { ...item, ...res.data.deta } : item,
+        ),
       );
 
       setcancelstatus((prev) => {
@@ -339,9 +321,7 @@ export default function ViewOrder() {
 
       Swal.fire({
         icon: "success",
-        title: isApproved
-          ? "Cancellation Approved!"
-          : "Cancellation Rejected!",
+        title: isApproved ? "Cancellation Approved!" : "Cancellation Rejected!",
         text: res.data.message,
         confirmButtonColor: "#4f46e5",
       });
@@ -386,10 +366,12 @@ export default function ViewOrder() {
       },
     };
 
-    return colors[value] || {
-      bg: "#f1f5f9",
-      color: "#475569",
-    };
+    return (
+      colors[value] || {
+        bg: "#f1f5f9",
+        color: "#475569",
+      }
+    );
   };
 
   const getCancelColor = (value) => {
@@ -400,24 +382,19 @@ export default function ViewOrder() {
       Rejected: { bg: "#fee2e2", color: "#dc2626" },
     };
 
-    return colors[value] || {
-      bg: "#f1f5f9",
-      color: "#64748b",
-    };
+    return (
+      colors[value] || {
+        bg: "#f1f5f9",
+        color: "#64748b",
+      }
+    );
   };
 
   // --------------------------------
   // STAT CARD
   // --------------------------------
 
-  const StatCard = ({
-    title,
-    value,
-    subtitle,
-    icon,
-    color,
-    background,
-  }) => (
+  const StatCard = ({ title, value, subtitle, icon, color, background }) => (
     <Card
       elevation={0}
       sx={{
@@ -438,11 +415,7 @@ export default function ViewOrder() {
           alignItems="center"
         >
           <Box>
-            <Typography
-              fontSize={13}
-              color="#64748b"
-              fontWeight={600}
-            >
+            <Typography fontSize={13} color="#64748b" fontWeight={600}>
               {title}
             </Typography>
 
@@ -455,11 +428,7 @@ export default function ViewOrder() {
               {value}
             </Typography>
 
-            <Typography
-              fontSize={11}
-              color="#94a3b8"
-              sx={{ mt: 0.7 }}
-            >
+            <Typography fontSize={11} color="#94a3b8" sx={{ mt: 0.7 }}>
               {subtitle}
             </Typography>
           </Box>
@@ -485,6 +454,31 @@ export default function ViewOrder() {
   // MAIN UI
   // --------------------------------
 
+  const handlinvoicegeneretion = async (id) => {
+    console.log("order id ", id);
+
+    const responce = await axios.get(`http://localhost:5600/pdf/admin/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      responseType: "blob",
+    });
+
+
+    console.log(responce);
+    
+    const url = window.URL.createObjectURL(responce.data);
+
+    console.log(url);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Invoice-${id}.pdf`;
+    link.click();
+
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
     <AdminDrawer>
       <Box
@@ -504,19 +498,11 @@ export default function ViewOrder() {
           sx={{ mb: 3.5 }}
         >
           <Box>
-            <Typography
-              fontSize={26}
-              fontWeight={800}
-              color="#111827"
-            >
+            <Typography fontSize={26} fontWeight={800} color="#111827">
               Order Management
             </Typography>
 
-            <Typography
-              color="#94a3b8"
-              fontSize={13}
-              sx={{ mt: 0.7 }}
-            >
+            <Typography color="#94a3b8" fontSize={13} sx={{ mt: 0.7 }}>
               Dashboard / Orders / Manage Orders
             </Typography>
           </Box>
@@ -607,19 +593,11 @@ export default function ViewOrder() {
               spacing={2}
             >
               <Box>
-                <Typography
-                  fontSize={18}
-                  fontWeight={800}
-                  color="#111827"
-                >
+                <Typography fontSize={18} fontWeight={800} color="#111827">
                   All Orders
                 </Typography>
 
-                <Typography
-                  fontSize={12}
-                  color="#94a3b8"
-                  sx={{ mt: 0.5 }}
-                >
+                <Typography fontSize={12} color="#94a3b8" sx={{ mt: 0.5 }}>
                   View, track and manage customer orders
                 </Typography>
               </Box>
@@ -647,9 +625,7 @@ export default function ViewOrder() {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <SearchRoundedIcon
-                          sx={{ color: "#94a3b8" }}
-                        />
+                        <SearchRoundedIcon sx={{ color: "#94a3b8" }} />
                       </InputAdornment>
                     ),
                   }}
@@ -745,16 +721,9 @@ export default function ViewOrder() {
                 {loading ? (
                   <TableRow>
                     <TableCell colSpan={8} align="center">
-                      <Stack
-                        alignItems="center"
-                        spacing={1.5}
-                        sx={{ py: 6 }}
-                      >
+                      <Stack alignItems="center" spacing={1.5} sx={{ py: 6 }}>
                         <CircularProgress size={30} />
-                        <Typography
-                          color="#64748b"
-                          fontSize={13}
-                        >
+                        <Typography color="#64748b" fontSize={13}>
                           Loading orders...
                         </Typography>
                       </Stack>
@@ -763,11 +732,7 @@ export default function ViewOrder() {
                 ) : filteredOrders.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} align="center">
-                      <Stack
-                        alignItems="center"
-                        spacing={1}
-                        sx={{ py: 6 }}
-                      >
+                      <Stack alignItems="center" spacing={1} sx={{ py: 6 }}>
                         <ShoppingBagRoundedIcon
                           sx={{
                             fontSize: 45,
@@ -775,17 +740,11 @@ export default function ViewOrder() {
                           }}
                         />
 
-                        <Typography
-                          fontWeight={700}
-                          color="#475569"
-                        >
+                        <Typography fontWeight={700} color="#475569">
                           No Orders Found
                         </Typography>
 
-                        <Typography
-                          fontSize={12}
-                          color="#94a3b8"
-                        >
+                        <Typography fontSize={12} color="#94a3b8">
                           Try changing your search or filters.
                         </Typography>
                       </Stack>
@@ -793,17 +752,12 @@ export default function ViewOrder() {
                   </TableRow>
                 ) : (
                   filteredOrders
-                    .slice(
-                      page * rowperpage,
-                      page * rowperpage + rowperpage
-                    )
+                    .slice(page * rowperpage, page * rowperpage + rowperpage)
                     .map((item, index) => {
-                      const orderColor = getOrderColor(
-                        item.orderStatus
-                      );
+                      const orderColor = getOrderColor(item.orderStatus);
 
                       const cancellationColor = getCancelColor(
-                        item.cancellation?.status
+                        item.cancellation?.status,
                       );
 
                       const cancellationPending = [
@@ -811,8 +765,7 @@ export default function ViewOrder() {
                         "Pending",
                       ].includes(item.cancellation?.status);
 
-                      const selectedCancel =
-                        cancelstatus[item._id] || "";
+                      const selectedCancel = cancelstatus[item._id] || "";
 
                       return (
                         <TableRow
@@ -887,9 +840,7 @@ export default function ViewOrder() {
                                       borderRadius: 2,
                                     }}
                                   >
-                                    <Inventory2RoundedIcon
-                                      fontSize="small"
-                                    />
+                                    <Inventory2RoundedIcon fontSize="small" />
                                   </Avatar>
 
                                   <Box>
@@ -901,12 +852,11 @@ export default function ViewOrder() {
                                       {product.name}
                                     </Typography>
 
-                                    <Typography
-                                      fontSize={10}
-                                      color="#94a3b8"
-                                    >
+                                    <Typography fontSize={10} color="#94a3b8">
                                       Qty: {product.quantity} × ₹
-                                      {Number(product.price || 0).toLocaleString("en-IN")}
+                                      {Number(
+                                        product.price || 0,
+                                      ).toLocaleString("en-IN")}
                                     </Typography>
                                   </Box>
                                 </Stack>
@@ -929,14 +879,11 @@ export default function ViewOrder() {
                                 }}
                               />
 
-                              <Typography
-                                fontSize={12}
-                                color="#475569"
-                              >
+                              <Typography fontSize={12} color="#475569">
                                 {item.createdAt
-                                  ? new Date(
-                                      item.createdAt
-                                    ).toLocaleDateString("en-IN")
+                                  ? new Date(item.createdAt).toLocaleDateString(
+                                      "en-IN",
+                                    )
                                   : "N/A"}
                               </Typography>
                             </Stack>
@@ -951,9 +898,9 @@ export default function ViewOrder() {
                               color="#4f46e5"
                             >
                               ₹
-                              {Number(
-                                item.grandTotal || 0
-                              ).toLocaleString("en-IN")}
+                              {Number(item.grandTotal || 0).toLocaleString(
+                                "en-IN",
+                              )}
                             </Typography>
                           </TableCell>
 
@@ -976,15 +923,9 @@ export default function ViewOrder() {
 
                               <Select
                                 size="small"
-                                value={
-                                  status[item._id] ??
-                                  item.orderStatus
-                                }
+                                value={status[item._id] ?? item.orderStatus}
                                 onChange={(e) =>
-                                  handlstatusupdate(
-                                    item._id,
-                                    e.target.value
-                                  )
+                                  handlstatusupdate(item._id, e.target.value)
                                 }
                                 sx={{
                                   minWidth: 145,
@@ -993,21 +934,13 @@ export default function ViewOrder() {
                                   bgcolor: "#fff",
                                 }}
                               >
-                                <MenuItem value="Pending">
-                                  Pending
-                                </MenuItem>
-                                <MenuItem value="Confirmed">
-                                  Confirmed
-                                </MenuItem>
-                                <MenuItem value="Shipped">
-                                  Shipped
-                                </MenuItem>
+                                <MenuItem value="Pending">Pending</MenuItem>
+                                <MenuItem value="Confirmed">Confirmed</MenuItem>
+                                <MenuItem value="Shipped">Shipped</MenuItem>
                                 <MenuItem value="Out for Delivery">
                                   Out for Delivery
                                 </MenuItem>
-                                <MenuItem value="Delivered">
-                                  Delivered
-                                </MenuItem>
+                                <MenuItem value="Delivered">Delivered</MenuItem>
                               </Select>
 
                               {status[item._id] &&
@@ -1016,10 +949,7 @@ export default function ViewOrder() {
                                     variant="contained"
                                     size="small"
                                     onClick={() =>
-                                      handlupdate(
-                                        item._id,
-                                        status[item._id]
-                                      )
+                                      handlupdate(item._id, status[item._id])
                                     }
                                     sx={{
                                       textTransform: "none",
@@ -1057,18 +987,13 @@ export default function ViewOrder() {
                                   }}
                                 />
                               ) : (
-                                <Typography
-                                  fontSize={11}
-                                  color="#94a3b8"
-                                >
+                                <Typography fontSize={11} color="#94a3b8">
                                   No Request
                                 </Typography>
                               )}
 
                               {item.cancellation?.reason && (
-                                <Tooltip
-                                  title={item.cancellation.reason}
-                                >
+                                <Tooltip title={item.cancellation.reason}>
                                   <Typography
                                     fontSize={10}
                                     color="#64748b"
@@ -1093,7 +1018,7 @@ export default function ViewOrder() {
                                     onChange={(e) =>
                                       handlcancelselect(
                                         item._id,
-                                        e.target.value
+                                        e.target.value,
                                       )
                                     }
                                     sx={{
@@ -1108,9 +1033,7 @@ export default function ViewOrder() {
                                     <MenuItem value="Approved">
                                       Approve
                                     </MenuItem>
-                                    <MenuItem value="Rejected">
-                                      Reject
-                                    </MenuItem>
+                                    <MenuItem value="Rejected">Reject</MenuItem>
                                   </Select>
 
                                   {selectedCancel && (
@@ -1125,7 +1048,7 @@ export default function ViewOrder() {
                                       onClick={() =>
                                         handlcancelstatus(
                                           item._id,
-                                          selectedCancel
+                                          selectedCancel,
                                         )
                                       }
                                       sx={{
@@ -1155,14 +1078,12 @@ export default function ViewOrder() {
                                     Swal.fire(
                                       "Details unavailable",
                                       "No product is available for this order.",
-                                      "info"
+                                      "info",
                                     );
                                     return;
                                   }
 
-                                  navigate(
-                                    `/admin/single/view/${productId}`
-                                  );
+                                  navigate(`/admin/single/view/${productId}`);
                                 }}
                                 sx={{
                                   bgcolor: "#eef2ff",
@@ -1171,11 +1092,34 @@ export default function ViewOrder() {
                                   "&:hover": {
                                     bgcolor: "#c7d2fe",
                                   },
+                                  m: 2,
                                 }}
                               >
-                                <VisibilityOutlinedIcon
-                                  fontSize="small"
-                                />
+                                <VisibilityOutlinedIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+
+                            <Tooltip title="Download Invoice">
+                              <IconButton
+                                sx={{
+                                  bgcolor: "#E8EEFF",
+                                  color: "#3457D5",
+                                  borderRadius: 2,
+                                  transition: "all 0.2s ease",
+
+                                  "&:hover": {
+                                    bgcolor: "#3457D5",
+                                    color: "#FFFFFF",
+                                    transform: "translateY(-2px)",
+                                    boxShadow:
+                                      "0 4px 10px rgba(52,87,213,0.25)",
+                                  },
+                                }}
+                                onClick={() => {
+                                  handlinvoicegeneretion(item._id);
+                                }}
+                              >
+                                <FileCopyOutlinedIcon />
                               </IconButton>
                             </Tooltip>
                           </TableCell>
@@ -1196,10 +1140,7 @@ export default function ViewOrder() {
             count={filteredOrders.length}
             page={Math.min(
               page,
-              Math.max(
-                0,
-                Math.ceil(filteredOrders.length / rowperpage) - 1
-              )
+              Math.max(0, Math.ceil(filteredOrders.length / rowperpage) - 1),
             )}
             rowsPerPage={rowperpage}
             onPageChange={handlePageChange}
@@ -1211,10 +1152,11 @@ export default function ViewOrder() {
               "& .MuiTablePagination-toolbar": {
                 minHeight: 60,
               },
-              "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows": {
-                fontSize: 12,
-                color: "#64748b",
-              },
+              "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
+                {
+                  fontSize: 12,
+                  color: "#64748b",
+                },
             }}
           />
         </Paper>
@@ -1252,18 +1194,11 @@ export default function ViewOrder() {
                   </Avatar>
 
                   <Box>
-                    <Typography
-                      fontSize={16}
-                      fontWeight={800}
-                      color="#111827"
-                    >
+                    <Typography fontSize={16} fontWeight={800} color="#111827">
                       Order Fulfillment Overview
                     </Typography>
 
-                    <Typography
-                      fontSize={11}
-                      color="#94a3b8"
-                    >
+                    <Typography fontSize={11} color="#94a3b8">
                       Delivered orders compared to total orders
                     </Typography>
                   </Box>
@@ -1274,19 +1209,11 @@ export default function ViewOrder() {
                   justifyContent="space-between"
                   sx={{ mb: 1 }}
                 >
-                  <Typography
-                    fontSize={12}
-                    color="#475569"
-                    fontWeight={600}
-                  >
+                  <Typography fontSize={12} color="#475569" fontWeight={600}>
                     Delivered Orders
                   </Typography>
 
-                  <Typography
-                    fontSize={12}
-                    color="#059669"
-                    fontWeight={800}
-                  >
+                  <Typography fontSize={12} color="#059669" fontWeight={800}>
                     {deliveredOrders} ({deliveredPercentage}%)
                   </Typography>
                 </Stack>
@@ -1309,49 +1236,28 @@ export default function ViewOrder() {
 
                 <Grid container spacing={2}>
                   <Grid item xs={4}>
-                    <Typography
-                      fontSize={11}
-                      color="#94a3b8"
-                    >
+                    <Typography fontSize={11} color="#94a3b8">
                       Total Orders
                     </Typography>
-                    <Typography
-                      fontWeight={800}
-                      fontSize={19}
-                      color="#111827"
-                    >
+                    <Typography fontWeight={800} fontSize={19} color="#111827">
                       {totalOrders}
                     </Typography>
                   </Grid>
 
                   <Grid item xs={4}>
-                    <Typography
-                      fontSize={11}
-                      color="#94a3b8"
-                    >
+                    <Typography fontSize={11} color="#94a3b8">
                       Delivered
                     </Typography>
-                    <Typography
-                      fontWeight={800}
-                      fontSize={19}
-                      color="#059669"
-                    >
+                    <Typography fontWeight={800} fontSize={19} color="#059669">
                       {deliveredOrders}
                     </Typography>
                   </Grid>
 
                   <Grid item xs={4}>
-                    <Typography
-                      fontSize={11}
-                      color="#94a3b8"
-                    >
+                    <Typography fontSize={11} color="#94a3b8">
                       Pending
                     </Typography>
-                    <Typography
-                      fontWeight={800}
-                      fontSize={19}
-                      color="#d97706"
-                    >
+                    <Typography fontWeight={800} fontSize={19} color="#d97706">
                       {pendingOrders}
                     </Typography>
                   </Grid>
@@ -1390,18 +1296,11 @@ export default function ViewOrder() {
                   </Avatar>
 
                   <Box>
-                    <Typography
-                      fontSize={16}
-                      fontWeight={800}
-                      color="#111827"
-                    >
+                    <Typography fontSize={16} fontWeight={800} color="#111827">
                       Cancellation Overview
                     </Typography>
 
-                    <Typography
-                      fontSize={11}
-                      color="#94a3b8"
-                    >
+                    <Typography fontSize={11} color="#94a3b8">
                       Current cancellation request summary
                     </Typography>
                   </Box>
@@ -1413,10 +1312,7 @@ export default function ViewOrder() {
                     justifyContent="space-between"
                     alignItems="center"
                   >
-                    <Typography
-                      fontSize={12}
-                      color="#64748b"
-                    >
+                    <Typography fontSize={12} color="#64748b">
                       Awaiting Review
                     </Typography>
 
@@ -1438,10 +1334,7 @@ export default function ViewOrder() {
                     justifyContent="space-between"
                     alignItems="center"
                   >
-                    <Typography
-                      fontSize={12}
-                      color="#64748b"
-                    >
+                    <Typography fontSize={12} color="#64748b">
                       Approved Requests
                     </Typography>
 
@@ -1449,8 +1342,7 @@ export default function ViewOrder() {
                       size="small"
                       label={
                         deta.filter(
-                          (item) =>
-                            item.cancellation?.status === "Approved"
+                          (item) => item.cancellation?.status === "Approved",
                         ).length
                       }
                       color="success"
@@ -1464,10 +1356,7 @@ export default function ViewOrder() {
                     justifyContent="space-between"
                     alignItems="center"
                   >
-                    <Typography
-                      fontSize={12}
-                      color="#64748b"
-                    >
+                    <Typography fontSize={12} color="#64748b">
                       Rejected Requests
                     </Typography>
 
@@ -1475,8 +1364,7 @@ export default function ViewOrder() {
                       size="small"
                       label={
                         deta.filter(
-                          (item) =>
-                            item.cancellation?.status === "Rejected"
+                          (item) => item.cancellation?.status === "Rejected",
                         ).length
                       }
                       color="error"
@@ -1488,8 +1376,8 @@ export default function ViewOrder() {
                     color="#94a3b8"
                     sx={{ lineHeight: 1.7 }}
                   >
-                    Review pending cancellation requests directly
-                    from the orders table.
+                    Review pending cancellation requests directly from the
+                    orders table.
                   </Typography>
                 </Stack>
               </CardContent>
@@ -1500,10 +1388,7 @@ export default function ViewOrder() {
         {/* FOOTER */}
 
         <Box sx={{ textAlign: "center", mt: 4, pb: 2 }}>
-          <Typography
-            fontSize={11}
-            color="#94a3b8"
-          >
+          <Typography fontSize={11} color="#94a3b8">
             OrderFlow Admin Panel • Order Management
           </Typography>
         </Box>

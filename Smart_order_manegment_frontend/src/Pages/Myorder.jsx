@@ -1,8 +1,8 @@
-
 import React, { useEffect, useState } from "react";
 import Drawers1 from "../Component/Drawers1";
 import axios from "axios";
 import Swal from "sweetalert2";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import { useNavigate } from "react-router-dom";
 
 import Box from "@mui/material/Box";
@@ -101,18 +101,49 @@ export default function Myorder() {
 
   const totalOrders = order.length;
 
+  const DownloadInvoice = async (orderId) => {
+
+    console.log(orderId);
+    
+    try {
+      const response = await axios.get(
+        `http://localhost:5600/pdf/user/${orderId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          responseType: "blob",
+        },
+      );
+
+      const url = window.URL.createObjectURL(response.data);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Invoice-${orderId}.pdf`;
+      link.click();
+
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.log(error);
+    }
+  };
   const pendingOrders = order.filter((item) =>
-    ["pending", "confirmed", "processing", "shipped", "out for delivery"].includes(
-      item.orderStatus?.toLowerCase()
-    )
+    [
+      "pending",
+      "confirmed",
+      "processing",
+      "shipped",
+      "out for delivery",
+    ].includes(item.orderStatus?.toLowerCase()),
   ).length;
 
   const deliveredOrders = order.filter(
-    (item) => item.orderStatus?.toLowerCase() === "delivered"
+    (item) => item.orderStatus?.toLowerCase() === "delivered",
   ).length;
 
   const cancelledOrders = order.filter(
-    (item) => item.orderStatus?.toLowerCase() === "cancelled"
+    (item) => item.orderStatus?.toLowerCase() === "cancelled",
   ).length;
 
   // STATUS INDEX
@@ -131,7 +162,7 @@ export default function Myorder() {
 
   const getStepHistory = (item, step) => {
     return item.statusHistory?.find(
-      (history) => history.status?.toLowerCase() === step.toLowerCase()
+      (history) => history.status?.toLowerCase() === step.toLowerCase(),
     );
   };
 
@@ -198,12 +229,13 @@ export default function Myorder() {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-        }
+        },
       );
 
       await Swal.fire({
         title: "Request Submitted!",
-        text: res.data.message || "Cancellation request submitted successfully.",
+        text:
+          res.data.message || "Cancellation request submitted successfully.",
         icon: "success",
         confirmButtonColor: "#4f46e5",
       });
@@ -296,9 +328,7 @@ export default function Myorder() {
                     height: compact ? 27 : 39,
                     width: 2,
                     bgcolor:
-                      completed && index < activeStep
-                        ? "#4f46e5"
-                        : "#e2e8f0",
+                      completed && index < activeStep ? "#4f46e5" : "#e2e8f0",
                   }}
                 />
               )}
@@ -368,12 +398,7 @@ export default function Myorder() {
             {title}
           </Typography>
 
-          <Typography
-            variant="h4"
-            fontWeight={800}
-            color="#172554"
-            mt={1}
-          >
+          <Typography variant="h4" fontWeight={800} color="#172554" mt={1}>
             {count}
           </Typography>
         </Box>
@@ -507,19 +532,13 @@ export default function Myorder() {
             </Avatar>
 
             <Box>
-              <Typography
-                fontSize={{ xs: 19, md: 23 }}
-                fontWeight={800}
-              >
+              <Typography fontSize={{ xs: 19, md: 23 }} fontWeight={800}>
                 Your Shopping Dashboard
               </Typography>
 
-              <Typography
-                fontSize={13}
-                color="#e0e7ff"
-                mt={0.5}
-              >
-                All your orders, delivery updates and purchase details in one place.
+              <Typography fontSize={13} color="#e0e7ff" mt={0.5}>
+                All your orders, delivery updates and purchase details in one
+                place.
               </Typography>
             </Box>
           </Stack>
@@ -652,7 +671,8 @@ export default function Myorder() {
             </Typography>
 
             <Typography color="#94a3b8" fontSize={14} mt={1} mb={3}>
-              Your orders will appear here after you complete your first purchase.
+              Your orders will appear here after you complete your first
+              purchase.
             </Typography>
 
             <Button
@@ -682,8 +702,7 @@ export default function Myorder() {
             const statusStyle = getStatusStyle(status);
             const isCancelled = status.toLowerCase() === "cancelled";
             const isDelivered = status.toLowerCase() === "delivered";
-            const cancellationRequested =
-              item.cancellation?.requested;
+            const cancellationRequested = item.cancellation?.requested;
 
             return (
               <Paper
@@ -767,7 +786,7 @@ export default function Myorder() {
                                 day: "numeric",
                                 month: "short",
                                 year: "numeric",
-                              }
+                              },
                             )
                           : "Date unavailable"}
                       </Typography>
@@ -801,13 +820,7 @@ export default function Myorder() {
                     </Box>
 
                     <Chip
-                      icon={
-                        isCancelled ? (
-                          <CloseIcon />
-                        ) : (
-                          <CheckCircleIcon />
-                        )
-                      }
+                      icon={isCancelled ? <CloseIcon /> : <CheckCircleIcon />}
                       label={status}
                       sx={{
                         height: 35,
@@ -926,7 +939,7 @@ export default function Myorder() {
                                 >
                                   ₹
                                   {Number(
-                                    p.total ?? p.price * quantity ?? 0
+                                    p.total ?? p.price * quantity ?? 0,
                                   ).toLocaleString("en-IN")}
                                 </Typography>
                               </Box>
@@ -965,11 +978,7 @@ export default function Myorder() {
                           Cancellation Request Submitted
                         </Typography>
 
-                        <Typography
-                          color="#a16207"
-                          fontSize={12}
-                          mt={0.5}
-                        >
+                        <Typography color="#a16207" fontSize={12} mt={0.5}>
                           Your cancellation request is awaiting processing.
                         </Typography>
                       </Paper>
@@ -1000,13 +1009,27 @@ export default function Myorder() {
                       </Button>
 
                       <Button
+                        variant="contained"
+                        startIcon={<InsertDriveFileIcon />}
+                        onClick={() => DownloadInvoice(item._id)}
+                        sx={{
+                          borderRadius: 2,
+                          px: 2.5,
+                          py: 1.2,
+                          bgcolor: "#4f46e5",
+                          textTransform: "none",
+                          fontWeight: 700,
+                          "&:hover": { bgcolor: "#4338ca" },
+                        }}
+                      >
+                        Generet Invoice
+                      </Button>
+                      <Button
                         variant="outlined"
                         color="error"
                         startIcon={<CancelOutlinedIcon />}
                         disabled={
-                          isCancelled ||
-                          isDelivered ||
-                          cancellationRequested
+                          isCancelled || isDelivered || cancellationRequested
                         }
                         onClick={() => handlcancelrequest(item._id)}
                         sx={{
@@ -1150,12 +1173,9 @@ export default function Myorder() {
                     label={selectedOrder.orderStatus || "Pending"}
                     sx={{
                       fontWeight: 700,
-                      bgcolor: getStatusStyle(
-                        selectedOrder.orderStatus
-                      ).bgcolor,
-                      color: getStatusStyle(
-                        selectedOrder.orderStatus
-                      ).color,
+                      bgcolor: getStatusStyle(selectedOrder.orderStatus)
+                        .bgcolor,
+                      color: getStatusStyle(selectedOrder.orderStatus).color,
                     }}
                   />
                 </Stack>

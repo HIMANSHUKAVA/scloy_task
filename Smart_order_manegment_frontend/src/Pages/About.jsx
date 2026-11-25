@@ -404,7 +404,7 @@ export default function About() {
         </Grid>
 
         {/* MISSION AND VISION */}
-        <Box sx={{ mb: 4 }}>
+        <Box sx={{ mb: 4 , mt:7 }}>
           <Box sx={{ mb: 2.5 }}>
             <Typography variant="h6" fontWeight={850} color="#172554">
               Our Mission & Vision
@@ -509,7 +509,7 @@ export default function About() {
         </Box>
 
         {/* WHAT WE OFFER */}
-        <Box sx={{ mb: 4 }}>
+        <Box sx={{ mb: 4  , mt:8}}>
           <Typography variant="h6" fontWeight={850} color="#172554">
             What We Offer
           </Typography>
@@ -518,7 +518,7 @@ export default function About() {
             Features designed to improve your shopping experience.
           </Typography>
 
-          <Grid container spacing={2.5}>
+          <Grid container spacing={2.5} >
             {features.map((item) => (
               <Grid key={item.title} size={{ xs: 12, sm: 6, lg: 3 }}>
                 <Paper
@@ -581,6 +581,7 @@ export default function About() {
             borderRadius: 3.5,
             border: "1px solid #e8edf5",
             bgcolor: "#fff",
+            mt:8
           }}
         >
           <Typography variant="h6" fontWeight={850} color="#172554">

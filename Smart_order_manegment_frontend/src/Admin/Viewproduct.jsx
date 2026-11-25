@@ -484,6 +484,7 @@ export default function Viewproduct() {
                     transform: "translateY(-3px)",
                     boxShadow: "0 10px 25px rgba(15,23,42,0.06)",
                   },
+                  mt:2
                 }}
               >
                 <Stack
@@ -542,10 +543,11 @@ export default function Viewproduct() {
           elevation={0}
           sx={{
             p: { xs: 2, md: 2.5 },
-            mb: 3,
+            mb: 1,
             borderRadius: 3,
             border: "1px solid #e8edf5",
             bgcolor: "#ffffff",
+            mt:8
           }}
         >
           <Stack

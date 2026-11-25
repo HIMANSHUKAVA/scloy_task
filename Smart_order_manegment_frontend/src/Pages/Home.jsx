@@ -577,7 +577,7 @@ export default function Home() {
         </Grid>
 
         {/* EXPLORE CATEGORIES */}
-        <Box sx={{ mb: 4 }}>
+        <Box sx={{ mb: 4  , mt:7}}>
           <Stack
             direction="row"
             justifyContent="space-between"
@@ -726,6 +726,7 @@ export default function Home() {
             borderRadius: 3.5,
             border: "1px solid #e9edf5",
             bgcolor: "#fff",
+            mt:7
           }}
         >
           <Typography variant="h6" fontWeight={850} color="#172554">

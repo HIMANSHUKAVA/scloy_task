@@ -34,7 +34,8 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import Swal from "sweetalert2";
 
 export default function Drawers1({ children }) {
-  const [open, setOpen] = useState(true);
+  // const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   const theme = useTheme();
   const mobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -408,7 +409,7 @@ export default function Drawers1({ children }) {
         variant={mobile ? "temporary" : "permanent"}
         open={mobile ? open : true}
         onClose={() => setOpen(false)}
-        ModalProps={{ keepMounted: true }}
+        // ModalProps={{ keepMounted: true }}
         sx={{
           width: mobile ? 260 : drawerWidth,
           flexShrink: 0,

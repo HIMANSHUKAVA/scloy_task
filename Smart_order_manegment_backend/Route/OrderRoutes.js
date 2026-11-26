@@ -6,7 +6,7 @@ import {
   HasRoleMiddlware,
 } from "../Middleware/loginMiddlware.js";
 
-import { aproverd_request, cancelrequest, create_order_user, fetchorders, findsingleorder, Getallorderadmin, orderstatus, reject } from "../Controller/OrderControllers.js";
+import { aproverd_request, cancelrequest, create_order_user, fetchorders, findsingleorder, Getallorderadmin, orderchart, orderstatus, reject } from "../Controller/OrderControllers.js";
 
 const order_router = express.Router();
 
@@ -78,5 +78,6 @@ order_router.put(
   reject
 );
 
+order_router.get("/admin/orderchart" , VarifyTokenMiddlware , HasRoleMiddlware("Admin") , orderchart)
 export default order_router;
 

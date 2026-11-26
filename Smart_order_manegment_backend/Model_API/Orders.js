@@ -2,6 +2,16 @@ import mongoose from "mongoose";
 import order_model from "../Model/OrdersModel.js";
 import product_model from "../Model/ProductModel.js";
 import { io } from "../app.js";
+import { generetnotification } from "../Model_API/notificationapi.js";
+
+async function SendNotification(type, message, title) {
+  try {
+    await generetnotification(type, message, title);
+  } catch (error) {
+    console.log("Notification failed:", error.message);
+  }
+}
+
 export async function createorder(data, userId) {
   const { id, quantity } = data;
 
@@ -81,7 +91,35 @@ export async function createorder(data, userId) {
 
     const [result] = await order_model.create([orderData], { session });
 
+
     await session.commitTransaction();
+
+    // New Order Notification
+    await SendNotification(
+      "order",
+      `New order ${result.orderNumber} has been received`,
+      "New Order",
+    );
+
+    // Stock Out Notification
+    if (updatedProduct.stock === 0 && product.stock > 0) {
+      await SendNotification(
+        "stockout",
+        `${product.productName} is out of stock`,
+        "Stock Out",
+      );
+    }
+
+    // Low Stock Notification (threshold: 5)
+    else if (updatedProduct.stock <= 5 && product.stock > 5) {
+      await SendNotification(
+        "lowstock",
+        `${product.productName} has only ${updatedProduct.stock} items left`,
+        "Low Stock",
+      );
+    }
+
+    return result;
 
     return result;
   } catch (error) {
@@ -96,7 +134,7 @@ export async function createorder(data, userId) {
 }
 
 export async function getmyorders() {
-  const result = await order_model.find().sort({createdAt:-1});
+  const result = await order_model.find().sort({ createdAt: -1 });
 
   return result;
 }
@@ -114,6 +152,14 @@ export async function GstSingleOrder(orderid, userid) {
 }
 
 export async function updateorderstatus(orderid, status, adminId) {
+  const oldOrder = await order_model.findById(orderid);
+
+  if (!oldOrder) {
+    throw new Error("Order not found");
+  }
+
+  const oldStatus = oldOrder.orderStatus;
+
   const result = await order_model.findByIdAndUpdate(
     orderid,
     {
@@ -134,15 +180,20 @@ export async function updateorderstatus(orderid, status, adminId) {
     },
   );
 
-  if (!result) {
-    throw new Error("Order not found");
+  // Notification only when status changes
+  if (oldStatus !== status) {
+    await SendNotification(
+      "order",
+      `Order ${result.orderNumber} status changed from ${oldStatus} to ${status}`,
+      `Order ${status}`,
+    );
   }
 
   return result;
 }
 
 export async function GetAllOderByadmin() {
-  const result = await order_model.find().sort({createdAt : -1});
+  const result = await order_model.find().sort({ createdAt: -1 });
 
   return result;
 }
@@ -154,10 +205,12 @@ export async function CancelRequest(userid, orderid, reason) {
     session.startTransaction();
 
     // Step 1: Check order
-    const order = await order_model.findOne({
-      _id: orderid,
-      userId: userid,
-    }).session(session);
+    const order = await order_model
+      .findOne({
+        _id: orderid,
+        userId: userid,
+      })
+      .session(session);
 
     if (!order) {
       throw new Error("Order not found");
@@ -187,7 +240,7 @@ export async function CancelRequest(userid, orderid, reason) {
         {
           session,
           new: true,
-        }
+        },
       );
 
       if (!updatedProduct) {
@@ -221,26 +274,23 @@ export async function CancelRequest(userid, orderid, reason) {
         new: true,
         runValidators: true,
         session,
-      }
+      },
     );
 
     // Step 6: Commit transaction
     await session.commitTransaction();
 
     return result;
-
   } catch (error) {
     if (session.inTransaction()) {
       await session.abortTransaction();
     }
 
     throw error;
-
   } finally {
     await session.endSession();
   }
 }
-
 
 export async function Aproved_Request(orderid, adminid) {
   const session = await mongoose.startSession();

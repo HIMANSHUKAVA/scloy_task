@@ -3,6 +3,7 @@ import express from "express";
 import {
   deleteproduct,
   FindByuserid,
+  productchart,
   saveproduct,
   updateproduct,
   viewproducts,
@@ -75,5 +76,7 @@ product_router.get(
   HasRoleMiddlware("Admin"),
   FindByuserid,
 );
+
+product_router.get("/admin/productchart" ,  VarifyTokenMiddlware , HasRoleMiddlware("Admin")  , productchart);
 
 export default product_router;

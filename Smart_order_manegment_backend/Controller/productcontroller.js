@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 import fs from "fs/promises";
 import path from "path";
@@ -9,9 +8,9 @@ import {
   getsingledeta,
   updatebyid,
   viewproduct,
-  findBySKU
+  findBySKU,
 } from "../Model_API/Productapi.js";
-
+import product_model from "../Model/ProductModel.js";
 
 // Helper: Delete image safely
 async function deleteImage(imagePath) {
@@ -19,18 +18,13 @@ async function deleteImage(imagePath) {
 
   const filename = path.basename(imagePath);
   console.log("file name" + filename);
-  
-  const fullPath = path.join(
-    process.cwd(),
-    "uploads",
-    "products",
-    filename
-  );
 
-  console.log("working directory" , process.cwd());
-  
-  console.log("full path" , fullPath);
-  
+  const fullPath = path.join(process.cwd(), "uploads", "products", filename);
+
+  console.log("working directory", process.cwd());
+
+  console.log("full path", fullPath);
+
   try {
     await fs.unlink(fullPath);
   } catch (error) {
@@ -40,23 +34,15 @@ async function deleteImage(imagePath) {
   }
 }
 
-
 // Helper: Validate MongoDB ID
 function validId(id) {
   return mongoose.isValidObjectId(id);
 }
 
-
 // 1. ADD PRODUCT
 export async function saveproduct(req, resp) {
   try {
-    const {
-      productName,
-      sku,
-      price,
-      description,
-      stock
-    } = req.body;
+    const { productName, sku, price, description, stock } = req.body;
 
     if (!productName || !sku || price === undefined || stock === undefined) {
       if (req.file) {
@@ -64,13 +50,13 @@ export async function saveproduct(req, resp) {
       }
 
       return resp.status(400).json({
-        message: "All product fields are required"
+        message: "All product fields are required",
       });
     }
 
     if (!req.file) {
       return resp.status(400).json({
-        message: "Product image is required"
+        message: "Product image is required",
       });
     }
 
@@ -80,12 +66,11 @@ export async function saveproduct(req, resp) {
       await deleteImage(req.file.filename);
 
       return resp.status(409).json({
-        message: "This SKU already exists"
+        message: "This SKU already exists",
       });
     }
 
-    const imagePath =
-      `/uploads/products/${req.file.filename}`;
+    const imagePath = `/uploads/products/${req.file.filename}`;
 
     const result = await Addproduct({
       productName,
@@ -93,14 +78,13 @@ export async function saveproduct(req, resp) {
       price: Number(price),
       description,
       stock: Number(stock),
-      productImage: imagePath
+      productImage: imagePath,
     });
 
     return resp.status(201).json({
       message: "Product added successfully",
-      data: result
+      data: result,
     });
-
   } catch (error) {
     if (req.file) {
       await deleteImage(req.file.filename);
@@ -108,18 +92,15 @@ export async function saveproduct(req, resp) {
 
     if (error.code === 11000) {
       return resp.status(409).json({
-        message: "SKU already exists"
+        message: "SKU already exists",
       });
     }
 
     return resp.status(500).json({
-      message: error.message
+      message: error.message,
     });
   }
 }
-
-
-
 
 // 2. VIEW ALL PRODUCTS
 export async function viewproducts(req, resp) {
@@ -128,16 +109,14 @@ export async function viewproducts(req, resp) {
 
     return resp.status(200).json({
       message: "Products fetched successfully",
-      data: result
+      data: result,
     });
-
   } catch (error) {
     return resp.status(500).json({
-      message: error.message
+      message: error.message,
     });
   }
 }
-
 
 // 3. GET SINGLE PRODUCT
 export async function FindByuserid(req, resp) {
@@ -146,7 +125,7 @@ export async function FindByuserid(req, resp) {
 
     if (!validId(id)) {
       return resp.status(400).json({
-        message: "Invalid product ID"
+        message: "Invalid product ID",
       });
     }
 
@@ -154,22 +133,20 @@ export async function FindByuserid(req, resp) {
 
     if (!result) {
       return resp.status(404).json({
-        message: "Product not found"
+        message: "Product not found",
       });
     }
 
     return resp.status(200).json({
       message: "Product found",
-      data: result
+      data: result,
     });
-
   } catch (error) {
     return resp.status(500).json({
-      message: error.message
+      message: error.message,
     });
   }
 }
-
 
 // 4. DELETE PRODUCT
 export async function deleteproduct(req, resp) {
@@ -178,7 +155,7 @@ export async function deleteproduct(req, resp) {
 
     if (!validId(id)) {
       return resp.status(400).json({
-        message: "Invalid product ID"
+        message: "Invalid product ID",
       });
     }
 
@@ -186,7 +163,7 @@ export async function deleteproduct(req, resp) {
 
     if (!result) {
       return resp.status(404).json({
-        message: "Product not found"
+        message: "Product not found",
       });
     }
 
@@ -195,16 +172,14 @@ export async function deleteproduct(req, resp) {
 
     return resp.status(200).json({
       message: "Product deleted successfully",
-      data: result
+      data: result,
     });
-
   } catch (error) {
     return resp.status(500).json({
-      message: error.message
+      message: error.message,
     });
   }
 }
-
 
 // 5. UPDATE PRODUCT
 export async function updateproduct(req, resp) {
@@ -217,7 +192,7 @@ export async function updateproduct(req, resp) {
       if (req.file) await deleteImage(req.file.filename);
 
       return resp.status(400).json({
-        message: "Invalid product ID"
+        message: "Invalid product ID",
       });
     }
 
@@ -228,13 +203,11 @@ export async function updateproduct(req, resp) {
       if (req.file) await deleteImage(req.file.filename);
 
       return resp.status(404).json({
-        message: "Product not found"
+        message: "Product not found",
       });
     }
 
-    newImage = req.file
-      ? `/uploads/products/${req.file.filename}`
-      : null;
+    newImage = req.file ? `/uploads/products/${req.file.filename}` : null;
 
     const updateData = { ...req.body };
 
@@ -248,17 +221,14 @@ export async function updateproduct(req, resp) {
     }
 
     // Check duplicate SKU
-    if (
-      updateData.sku &&
-      updateData.sku !== oldProduct.sku
-    ) {
+    if (updateData.sku && updateData.sku !== oldProduct.sku) {
       const existingProduct = await findBySKU(updateData.sku);
 
       if (existingProduct) {
         if (req.file) await deleteImage(req.file.filename);
 
         return resp.status(409).json({
-          message: "This SKU already exists"
+          message: "This SKU already exists",
         });
       }
     }
@@ -275,7 +245,7 @@ export async function updateproduct(req, resp) {
       if (req.file) await deleteImage(req.file.filename);
 
       return resp.status(404).json({
-        message: "Product update failed"
+        message: "Product update failed",
       });
     }
 
@@ -286,9 +256,8 @@ export async function updateproduct(req, resp) {
 
     return resp.status(200).json({
       message: "Product updated successfully",
-      data: result
+      data: result,
     });
-
   } catch (error) {
     // If DB update fails, remove newly uploaded image
     if (req.file) {
@@ -297,12 +266,41 @@ export async function updateproduct(req, resp) {
 
     if (error.code === 11000) {
       return resp.status(409).json({
-        message: "SKU already exists"
+        message: "SKU already exists",
       });
     }
 
     return resp.status(500).json({
-      message: error.message
+      message: error.message,
+    });
+  }
+}
+
+export async function productchart(req, resp) {
+  try {
+    const products = await product_model.aggregate([
+      {
+        $project: {
+          _id: 0,
+          productName: 1,
+          price: 1,
+        },
+      },
+      {
+        $sort: {
+          price: -1,
+        },
+      },
+    ]);
+
+    return resp.status(200).json({
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    return resp.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 }

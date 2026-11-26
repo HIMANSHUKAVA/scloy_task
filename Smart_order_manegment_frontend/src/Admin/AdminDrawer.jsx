@@ -32,6 +32,7 @@ import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import PhoneIcon from '@mui/icons-material/Phone';
 import Swal from "sweetalert2";
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 
 const drawerWidth = 260;
 const collapsedWidth = 82;
@@ -68,6 +69,11 @@ export default function AdminDrawer({ children }) {
       text : "Contects",
       icon: <PhoneIcon/>,
       to:"/admin/contectsreq"
+    },
+    {
+      text : "Users",
+      icon: <PeopleAltIcon/>,
+      to : "/admin/viewuser"
     }
   ];
 
@@ -168,38 +174,7 @@ export default function AdminDrawer({ children }) {
 
       {/* Admin Profile */}
 
-      <Box sx={{ p: 2 }}>
-        <Stack direction="row" alignItems="center" spacing={1.5}>
-          <Avatar
-            sx={{
-              bgcolor: "#3730a3",
-              color: "#c7d2fe",
-              fontWeight: 700,
-            }}
-          >
-            {username.charAt(0).toUpperCase()}
-          </Avatar>
 
-          {(expanded || mobile) && (
-            <Box sx={{ minWidth: 0 }}>
-              <Typography
-                fontWeight={700}
-                fontSize={13}
-                noWrap
-              >
-                {username}
-              </Typography>
-
-              <Typography
-                fontSize={11}
-                color="#9ca3af"
-              >
-                Administrator
-              </Typography>
-            </Box>
-          )}
-        </Stack>
-      </Box>
 
       {/* Navigation */}
 
@@ -411,7 +386,9 @@ export default function AdminDrawer({ children }) {
 
           {/* Notifications */}
 
-          <IconButton sx={{ color: "#64748b", mr: 1 }}>
+          <IconButton sx={{ color: "#64748b", mr: 1 }} onClick={()=>{
+            navigate("/admin/notification")
+          }}>
             <Badge color="error" variant="dot">
               <NotificationsNoneRoundedIcon />
             </Badge>

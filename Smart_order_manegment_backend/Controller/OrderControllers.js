@@ -9,6 +9,8 @@ import {
   updateorderstatus,
 } from "../Model_API/Orders.js";
 import { io } from "../app.js";
+import order_model from "../Model/OrdersModel.js";
+import {generetnotification} from "../Model_API/notificationapi.js"
 
 export async function create_order_user(req, resp) {
   console.log("CREATE ORDER CONTROLLER HIT");
@@ -114,7 +116,7 @@ export async function cancelrequest(req, resp) {
 
     if (
       result.orderStatus === "Out for Delivery" ||
-      result.orderStatus === "Delivered" 
+      result.orderStatus === "Delivered"
     ) {
       return resp.status(400).json({
         message: "Order cannot be cancelled at this stage",
@@ -170,6 +172,60 @@ export async function reject(req, resp) {
     }
   } catch (error) {
     return resp.status(500).json({
+      message: error.message,
+    });
+  }
+}
+
+export async function orderchart(req, resp) {
+  try {
+    const orderstatus = await order_model.aggregate([
+      {
+        $group: {
+          _id: {
+            month: { $month: "$createdAt" },
+            year: { $year: "$createdAt" },
+          },
+
+          totalorders: { $sum: 1 },
+
+          pendingOrders: {
+            $sum: {
+              $cond: [
+                { $eq: ["$orderStatus", "Pending"] },
+                1,
+                0,
+              ],
+            },
+          },
+
+          deliveredOrders: {
+            $sum: {
+              $cond: [
+                { $eq: ["$orderStatus", "Delivered"] },
+                1,
+                0,
+              ],
+            },
+          },
+        },
+      },
+      {
+        $sort: {
+          "_id.year": 1,
+          "_id.month": 1,
+        },
+      },
+    ]);
+
+    return resp.status(200).json({
+      success: true,
+      data: orderstatus,
+    });
+
+  } catch (error) {
+    return resp.status(500).json({
+      success: false,
       message: error.message,
     });
   }

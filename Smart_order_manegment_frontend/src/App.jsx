@@ -11,6 +11,9 @@ import Contect from "./Pages/Contect";
 
 import ProtectedRoute from "./Component/ProtectedRoute";
 import AdminHome from "./Admin/AdminHome"
+
+import Orderchart from "./Chart/Orderchart"
+import Productchart from "./Chart/Productchart"
 import Edituserbyadmin from "./Admin/Edituserbyadmin";
 import Addproduct from "./Admin/Addproduct"
 import Viewproduct from "./Admin/Viewproduct"
@@ -25,6 +28,8 @@ import Wishlist from "./Pages/Wishlist";
 import ViewOrder from "./Admin/ViewOrder";
 import Cart from "./Pages/Cart";
 import ContectView from "./Admin/ContectView";
+import Users from "./Admin/Users";
+import Notification from "./Admin/Notification";
 export default function App() {
   return (
     <BrowserRouter>
@@ -58,6 +63,11 @@ export default function App() {
           <Route path="/admin/single/view/:id" element={<Singleview/>}/>
           <Route path="/admin/vieworder" element={<ViewOrder/>}/>
           <Route path="/admin/contectsreq" element={<ContectView/>}/>
+          <Route path="/admin/viewuser" element={<Users/>}/>
+          <Route path="/admin/notification" element={<Notification/>}/>
+          
+          {/* <Route path="/admin/orderchart" element={<Orderchart/>}/>
+          <Route path="/admin/productchart" element={<Productchart/>}/> */}
           {/* /admin/contectsreq */}
         </Route>
       </Routes>

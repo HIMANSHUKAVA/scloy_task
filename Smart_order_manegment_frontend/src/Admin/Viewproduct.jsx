@@ -335,8 +335,9 @@ export default function Viewproduct() {
           alignItems={{ xs: "flex-start", sm: "center" }}
           spacing={2}
           mb={4}
+          width="100%"
         >
-          <Stack direction="row" spacing={2} alignItems="center">
+          <Stack direction="row" spacing={2} alignItems="center" sx={{flexGrow:1}}>
             <Avatar
               variant="rounded"
               sx={{
@@ -369,7 +370,8 @@ export default function Viewproduct() {
             </Box>
           </Stack>
 
-          <Stack direction="row" spacing={1.5}>
+
+          <Stack direction="row" spacing={1.5} alignItems="center">
             <Tooltip title="Refresh Products">
               <IconButton
                 onClick={FetchProducts}
@@ -396,6 +398,7 @@ export default function Viewproduct() {
               startIcon={<AddIcon />}
               onClick={() => navigate("/admin/add-product")}
               sx={{
+                
                 bgcolor: "#4f46e5",
                 borderRadius: 2.5,
                 px: 2.5,
@@ -411,6 +414,8 @@ export default function Viewproduct() {
               Add Product
             </Button>
           </Stack>
+
+          
         </Stack>
 
         {/* ================= STATS CARDS ================= */}
@@ -427,6 +432,7 @@ export default function Viewproduct() {
             },
             gap: { xs: 2, sm: 2.5 },
             mb: 4,
+            mt:6,
             width: "100%",
           }}
         >
@@ -1115,7 +1121,7 @@ export default function Viewproduct() {
         >
           {/* LOW STOCK ALERT */}
 
-          <Paper
+          {/* <Paper
             elevation={0}
             sx={{
               p: { xs: 2, sm: 2.5 },
@@ -1167,10 +1173,10 @@ export default function Viewproduct() {
             <Typography variant="caption" color="#94a3b8">
               Products with 1 to 5 units remaining
             </Typography>
-          </Paper>
+          </Paper> */}
 
           {/* PRODUCT CATEGORIES */}
-
+{/* 
           <Paper
             elevation={0}
             sx={{
@@ -1223,7 +1229,7 @@ export default function Viewproduct() {
             <Typography variant="caption" color="#94a3b8">
               Total unique product categories
             </Typography>
-          </Paper>
+          </Paper> */}
         </Box>
       </Box>
     </AdminDrawer>

@@ -6,7 +6,7 @@ import http from "http";
 import { Server } from "socket.io";
 
 import { GetMongoConnection } from "./config/Dbconnection.js";
-
+import notification_routes from "./Route/notificationroute.js"
 import login_router from "./Route/LoginRoute.js";
 import product_router from "./Route/Productroute.js";
 import order_router from "./Route/OrderRoutes.js";
@@ -94,6 +94,7 @@ app.use("/wish", wish_route);
 app.use("/cart", cart_route);
 app.use("/contect" , contect_router);
 app.use("/pdf" , pdf_reouter)
+app.use("/notification", notification_routes);
 // Start Server
 http_server.listen(5600, () => {
   console.log("Server running on port 5600");

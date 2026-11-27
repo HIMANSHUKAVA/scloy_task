@@ -1,8 +1,16 @@
 import mongoose from "mongoose";
 import order_model from "../Model/OrdersModel.js";
 import product_model from "../Model/ProductModel.js";
+import loginmodel from "../Model/LoginModel.js";
 import { io } from "../app.js";
+
 import { generetnotification } from "../Model_API/notificationapi.js";
+import {
+  SendCancellationEmail,
+  SendOrderEmail,
+  SendOrderStatusEmail,
+  SendLowStockEmail
+} from "../Mail/MailAPI.js";
 
 async function SendNotification(type, message, title) {
   try {
@@ -17,6 +25,12 @@ export async function createorder(data, userId) {
 
   const session = await mongoose.startSession();
 
+  const user = await loginmodel.findById(userId);
+
+  if (!user) {
+    throw new Error("user not found");
+  }
+
   try {
     session.startTransaction();
 
@@ -26,10 +40,10 @@ export async function createorder(data, userId) {
 
     const product = await product_model.findById(id).session(session);
 
-    console.log("PRODUCT ID:", product._id);
-    console.log("PRODUCT NAME:", product.productName);
-    console.log("CURRENT STOCK:", product.stock);
-    console.log("ORDER QUANTITY:", quantity);
+    // console.log("PRODUCT ID:", product._id);
+    // console.log("PRODUCT NAME:", product.productName);
+    // console.log("CURRENT STOCK:", product.stock);
+    // console.log("ORDER QUANTITY:", quantity);
 
     if (!product) {
       throw new Error("Product not found");
@@ -87,12 +101,18 @@ export async function createorder(data, userId) {
       ],
     };
 
-    console.log("Order Data:", orderData);
+    // console.log("Order Data:", orderData);
 
     const [result] = await order_model.create([orderData], { session });
 
-
     await session.commitTransaction();
+
+    try {
+      await SendOrderEmail(user.email, result, user);
+      console.log("email sended");
+    } catch (error) {
+      console.log("Order Email Error:", error.message);
+    }
 
     // New Order Notification
     await SendNotification(
@@ -100,25 +120,37 @@ export async function createorder(data, userId) {
       `New order ${result.orderNumber} has been received`,
       "New Order",
     );
-
-    // Stock Out Notification
+    // Stock Out Notification + Email
     if (updatedProduct.stock === 0 && product.stock > 0) {
       await SendNotification(
         "stockout",
         `${product.productName} is out of stock`,
         "Stock Out",
       );
+
+      try {
+        await SendLowStockEmail(updatedProduct);
+        console.log("Stock Out Email sent to admin");
+      } catch (error) {
+        console.log("Stock Out Email Error:", error.message);
+      }
     }
 
-    // Low Stock Notification (threshold: 5)
+    // Low Stock Notification + Email
     else if (updatedProduct.stock <= 5 && product.stock > 5) {
       await SendNotification(
         "lowstock",
         `${product.productName} has only ${updatedProduct.stock} items left`,
         "Low Stock",
       );
-    }
 
+      try {
+        await SendLowStockEmail(updatedProduct);
+        console.log("Low Stock Email sent to admin");
+      } catch (error) {
+        console.log("Low Stock Email Error:", error.message);
+      }
+    }
     return result;
 
     return result;
@@ -159,6 +191,7 @@ export async function updateorderstatus(orderid, status, adminId) {
   }
 
   const oldStatus = oldOrder.orderStatus;
+  const user = await loginmodel.findById(oldOrder.userId);
 
   const result = await order_model.findByIdAndUpdate(
     orderid,
@@ -189,6 +222,14 @@ export async function updateorderstatus(orderid, status, adminId) {
     );
   }
 
+  try {
+    await SendOrderStatusEmail(user.email, result, user, oldStatus);
+
+    console.log("email sended");
+  } catch (error) {
+    console.log("Order Email Error:", error.message);
+  }
+
   return result;
 }
 
@@ -203,6 +244,12 @@ export async function CancelRequest(userid, orderid, reason) {
 
   try {
     session.startTransaction();
+
+    const user = await loginmodel.findById(userid);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
 
     // Step 1: Check order
     const order = await order_model
@@ -239,7 +286,7 @@ export async function CancelRequest(userid, orderid, reason) {
         },
         {
           session,
-          new: true,
+          returnDocument: "after",
         },
       );
 
@@ -271,7 +318,7 @@ export async function CancelRequest(userid, orderid, reason) {
         },
       },
       {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
         session,
       },
@@ -279,6 +326,15 @@ export async function CancelRequest(userid, orderid, reason) {
 
     // Step 6: Commit transaction
     await session.commitTransaction();
+
+    // Step 7: Send cancellation email
+    try {
+      await SendCancellationEmail(user.email, result, user, reason);
+
+      console.log("Cancellation Email Sent");
+    } catch (error) {
+      console.log("Order Email Error:", error.message);
+    }
 
     return result;
   } catch (error) {

@@ -1,23 +1,22 @@
-
 import React, { useState } from "react";
-import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import Avatar from '@mui/material/Avatar';
-import Stack from '@mui/material/Stack';
-import Tooltip from '@mui/material/Tooltip';
-import Divider from '@mui/material/Divider';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import Badge from '@mui/material/Badge';
-import InputBase from '@mui/material/InputBase';
+import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Avatar from "@mui/material/Avatar";
+import Stack from "@mui/material/Stack";
+import Tooltip from "@mui/material/Tooltip";
+import Divider from "@mui/material/Divider";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import Badge from "@mui/material/Badge";
+import InputBase from "@mui/material/InputBase";
 import { useTheme } from "@mui/material/styles";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
@@ -30,9 +29,9 @@ import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import NotificationsNoneRoundedIcon from "@mui/icons-material/NotificationsNoneRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
-import PhoneIcon from '@mui/icons-material/Phone';
+import PhoneIcon from "@mui/icons-material/Phone";
 import Swal from "sweetalert2";
-import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 
 const drawerWidth = 260;
 const collapsedWidth = 82;
@@ -66,15 +65,15 @@ export default function AdminDrawer({ children }) {
       to: "/admin/vieworder",
     },
     {
-      text : "Contects",
-      icon: <PhoneIcon/>,
-      to:"/admin/contectsreq"
+      text: "Contects",
+      icon: <PhoneIcon />,
+      to: "/admin/contectsreq",
     },
     {
-      text : "Users",
-      icon: <PeopleAltIcon/>,
-      to : "/admin/viewuser"
-    }
+      text: "Users",
+      icon: <PeopleAltIcon />,
+      to: "/admin/viewuser",
+    },
   ];
 
   const handleLogout = async () => {
@@ -156,9 +155,7 @@ export default function AdminDrawer({ children }) {
           </Box>
         )}
 
-        {!mobile && (
-          <Box sx={{ flexGrow: 1 }} />
-        )}
+        {!mobile && <Box sx={{ flexGrow: 1 }} />}
 
         {mobile && (
           <IconButton
@@ -173,8 +170,6 @@ export default function AdminDrawer({ children }) {
       <Divider sx={{ borderColor: "#293548" }} />
 
       {/* Admin Profile */}
-
-
 
       {/* Navigation */}
 
@@ -199,11 +194,7 @@ export default function AdminDrawer({ children }) {
             const active = location.pathname === item.to;
 
             return (
-              <ListItem
-                key={item.to}
-                disablePadding
-                sx={{ mb: 0.8 }}
-              >
+              <ListItem key={item.to} disablePadding sx={{ mb: 0.8 }}>
                 <Tooltip
                   title={!expanded && !mobile ? item.text : ""}
                   placement="right"
@@ -221,13 +212,10 @@ export default function AdminDrawer({ children }) {
                         ? "linear-gradient(100deg, #4f46e5, #6366f1)"
                         : "transparent",
 
-                      justifyContent:
-                        expanded || mobile ? "initial" : "center",
+                      justifyContent: expanded || mobile ? "initial" : "center",
 
                       "&:hover": {
-                        background: active
-                          ? "#4f46e5"
-                          : "#1f2937",
+                        background: active ? "#4f46e5" : "#1f2937",
                         color: "#fff",
                       },
 
@@ -274,8 +262,7 @@ export default function AdminDrawer({ children }) {
             borderRadius: 2.5,
             color: "#f87171",
             minHeight: 48,
-            justifyContent:
-              expanded || mobile ? "initial" : "center",
+            justifyContent: expanded || mobile ? "initial" : "center",
             px: 1.8,
             "&:hover": {
               background: "#3f1d25",
@@ -308,16 +295,13 @@ export default function AdminDrawer({ children }) {
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
-
       {/* Top Navbar */}
 
       <AppBar
         position="fixed"
         elevation={0}
         sx={{
-          width: mobile
-            ? "100%"
-            : `calc(100% - ${currentWidth}px)`,
+          width: mobile ? "100%" : `calc(100% - ${currentWidth}px)`,
 
           ml: mobile ? 0 : `${currentWidth}px`,
 
@@ -374,9 +358,7 @@ export default function AdminDrawer({ children }) {
               width: 190,
             }}
           >
-            <SearchRoundedIcon
-              sx={{ color: "#9ca3af", fontSize: 20 }}
-            />
+            <SearchRoundedIcon sx={{ color: "#9ca3af", fontSize: 20 }} />
 
             <InputBase
               placeholder="Search..."
@@ -386,25 +368,31 @@ export default function AdminDrawer({ children }) {
 
           {/* Notifications */}
 
-          <IconButton sx={{ color: "#64748b", mr: 1 }} onClick={()=>{
-            navigate("/admin/notification")
-          }}>
+          <IconButton
+            sx={{ color: "#64748b", mr: 1 }}
+            onClick={() => {
+              navigate("/admin/notification");
+            }}
+          >
             <Badge color="error" variant="dot">
               <NotificationsNoneRoundedIcon />
             </Badge>
           </IconButton>
 
-          <Avatar
-            sx={{
-              width: 36,
-              height: 36,
-              bgcolor: "#4f46e5",
-              fontSize: 14,
-              fontWeight: 700,
-            }}
-          >
-            {username.charAt(0).toUpperCase()}
-          </Avatar>
+          <IconButton>
+            <Avatar
+              sx={{
+                width: 36,
+                height: 36,
+                bgcolor: "#4f46e5",
+                fontSize: 14,
+                fontWeight: 700,
+              }}
+              
+            >
+              {username.charAt(0).toUpperCase()}
+            </Avatar>
+          </IconButton>
         </Toolbar>
       </AppBar>
 

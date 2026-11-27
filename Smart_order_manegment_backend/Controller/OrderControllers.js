@@ -13,9 +13,9 @@ import order_model from "../Model/OrdersModel.js";
 import {generetnotification} from "../Model_API/notificationapi.js"
 
 export async function create_order_user(req, resp) {
-  console.log("CREATE ORDER CONTROLLER HIT");
-  console.log("BODY:", req.body);
-  console.log("USER:", req.user);
+  // console.log("CREATE ORDER CONTROLLER HIT");
+  // console.log("BODY:", req.body);
+  // console.log("USER:", req.user);
 
   const { id, quantity } = req.body;
   const userid = req.user.user_id;
